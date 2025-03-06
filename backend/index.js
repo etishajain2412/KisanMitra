@@ -1,11 +1,11 @@
 const express = require('express');
 const cors = require('cors');
-
+const connectDB=require('./config/db')
 require('dotenv').config();
-
+const User = require('./models/user');  // Import the User model
 const app = express();
 const port = process.env.PORT || 5000;
-
+connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -14,6 +14,9 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('Hello from the backend!');
 });
+
+
+
 
 // Start the server
 app.listen(port, () => {
