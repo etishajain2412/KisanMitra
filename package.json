@@ -1,0 +1,23 @@
+{
+  "name": "kisanmitra",
+  "version": "1.0.0",
+  "main": "index.js",
+
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm start",
+    "client": "cd frontend && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "dependencies": {
+    "clarifai": "^2.9.1",
+    "jwt-decode": "^4.0.0",
+    "openai": "^4.78.1"
+  }
+}
