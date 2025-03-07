@@ -6,9 +6,13 @@ const jwt=require('jsonwebtoken')
 
 router.post('/register', async (req, res) => {
   try {
-    console.log(req.body);
     const { name, username, email, password } = req.body;
-   
+
+    // Input validation
+    if (!name || !username || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'Email already exists' });
@@ -26,11 +30,17 @@ router.post('/register', async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
 
+    // Generate JWT token
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    // Send response with token
+    res.status(200).json({
+      message: 'Registration successful',
+      token
+    });
   } catch (error) {
-    console.error(error);
-
+    console.error('Error during registration:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

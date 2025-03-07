@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios'
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 function Register() {
   const [formData, setFormData] = useState({
     name: '',
@@ -7,6 +9,8 @@ function Register() {
     email: '',
     password: ''
   });
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   // Handle input change
   const handleChange = (e) => {
@@ -16,18 +20,27 @@ function Register() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form Data:', formData);
-    // // Add API call here to register the user
+    setMessage('');
+
     try {
-        const res = await axios.post('http://localhost:5000/api/auth/register', formData, {
-            headers: { 'Content-Type': 'application/json' },
-          });
-        alert("Registration successful");
-        console.log(res);
-      } catch (error) {
-        console.error("Registration failed:", error.response);
-        alert(error.response);
+      // Send a POST request to register the user
+      const res = await axios.post('http://localhost:5000/api/auth/register', formData, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      // Assuming the backend sends back a token upon successful registration
+      const { token } = res.data;
+
+      if (token) {
+        localStorage.setItem('token', token); // Store token in localStorage
+        navigate('/dashboard'); // Redirect to dashboard after successful registration
       }
+
+      setMessage('Registration successful!');
+    } catch (error) {
+      console.error('Registration failed:', error.response);
+      setMessage('Registration failed. Please try again.');
+    }
   };
 
   return (
@@ -100,6 +113,10 @@ function Register() {
             Register
           </button>
         </form>
+
+        {message && (
+          <p className="text-center mt-4 text-green-500">{message}</p>
+        )}
       </div>
     </div>
   );

@@ -1,24 +1,34 @@
 const jwt = require('jsonwebtoken');
 
 const verifyToken = (req, res, next) => {
-  // Get token from the Authorization header
-  const token = req.header('Authorization')?.split(' ')[1]; // Extract token from 'Bearer token'
+  // Get the Authorization header
+  const authHeader = req.header('Authorization');
 
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied. No token provided.' });
+  // Check if the header exists
+  if (!authHeader) {
+    return res.status(401).json({ message: 'Access Denied: No token provided' });
   }
 
+  // Check if the header is in the correct format: "Bearer <token>"
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2 || parts[0] !== 'Bearer') {
+    return res.status(401).json({ message: 'Access Denied: Invalid token format' });
+  }
+
+  // Extract the token
+  const token = parts[1];
+
+  // Verify the token
   try {
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const verified = jwt.verify(token, process.env.JWT_SECRET); // Decode token
+    console.log("Decoded User:", verified); // Debugging (remove in production)
 
-    // Attach the decoded user information to the request object
-    req.user = decoded;
-
-    // Call the next middleware or route handler
-    next();
+    // Attach the user ID to the request object
+    req.user = { id: verified.id }; // Ensure the payload contains `id`
+    next(); // Proceed to the next middleware/route
   } catch (error) {
-    res.status(400).json({ message: 'Invalid token.' });
+    console.error('Token verification error:', error.message); // Debugging
+    res.status(400).json({ message: 'Invalid Token' });
   }
 };
 
