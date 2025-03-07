@@ -147,9 +147,22 @@ function Dashboard() {
           >
             Remove Profile Picture
           </button>
+
         )}
 
         {message && <p className='text-center mt-2 text-green-500'>{message}</p>}
+        <button
+          onClick={() => navigate('/display')}
+          className="w-full p-3 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          View All Products
+        </button>
+        <button
+          onClick={() => navigate('/product')}
+          className="w-full p-3 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          Add Product
+        </button>
       </div>
     </div>
   );

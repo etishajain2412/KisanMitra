@@ -8,6 +8,7 @@ const authRoutes=require('./routes/auth')
 const profile=require('./routes/profile')
 const polygonRoutes=require('./routes/polygonRoutes')
 const weatherRoutes=require('./routes/weatherRoutes')
+const productRoutes=require('./routes/product')
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: "*" })); // ✅ Allows all origins
@@ -30,6 +31,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users',profile );
+app.use('/api/products',productRoutes );
 
 
 

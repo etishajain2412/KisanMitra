@@ -10,7 +10,11 @@ import Login from './pages/login';
 import Dashboard from './pages/dashboard';
 
 import HomePage from "./pages/HomePage";
-const App = () => {
+
+
+import Product from './pages/product';
+import DisplayProducts from './pages/DisplayProduct';
+function App() {
   return (
     <Router>
       <MyNavbar />
@@ -22,6 +26,9 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/display" element={<DisplayProducts />} />
+        <Route path="/product" element={<Product />} />
       </Routes>
     </Router>
   );

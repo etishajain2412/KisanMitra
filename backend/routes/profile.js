@@ -17,7 +17,7 @@ router.post('/upload-profile', verifyToken, upload.single('profileImage'), async
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // If user already has a profile picture, delete it from Cloudinary
+        
         // if (user.profilePicture.length != 0) {
         //     // Extract the publicId from the Cloudinary URL
         //     const urlParts = user.profilePicture.split('/');
