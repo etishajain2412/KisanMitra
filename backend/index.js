@@ -5,6 +5,7 @@ require('dotenv').config();
 const User = require('./models/user');  // Import the User model
 const authRoutes=require('./routes/auth')
 const profile=require('./routes/profile')
+const productRoutes=require('./routes/product')
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -18,6 +19,7 @@ app.get('/', (req, res) => {
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/users',profile );
+app.use('/api/products',productRoutes );
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

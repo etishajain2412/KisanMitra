@@ -5,7 +5,8 @@ import Register from './pages/register';
 import Login from './pages/login';
 import Dashboard from './pages/dashboard';
 import Home from './pages/Home';
-
+import Product from './pages/product';
+import DisplayProducts from './pages/DisplayProduct';
 function App() {
   return (
     <Router>
@@ -14,6 +15,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/display" element={<DisplayProducts />} />
+        <Route path="/product" element={<Product />} />
       </Routes>
     </Router>
   );
