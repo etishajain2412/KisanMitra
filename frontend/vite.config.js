@@ -1,21 +1,20 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
 export default defineConfig({
   server: {
-    port: 3000, 
-    strictPort: true, // Prevents auto-switching ports
-    hmr: 
-      // clientPort: 3000, // Forces WebSocket to use the same port
-      false,
-     
+    port: 3000,
+    strictPort: true, // Ensures Vite does not auto-switch ports
+    hmr: {
+      overlay: true, // Enables hot reload errors in the browser
+    },
   },
-<<<<<<< HEAD
   plugins: [react()],
   resolve: {
-    extensions: [".js", ".jsx"],  // Ensure JSX is recognized
+    extensions: [".js", ".jsx"], // Ensures JSX is recognized
   },
-=======
-  plugins: [react(), tailwindcss(),],
->>>>>>> bb017d1b60595cc9d457ee8d65a9ec0c611ed127
-})
+  css: {
+    postcss: "./postcss.config.js", // Ensures Tailwind is correctly loaded
+  },
+});
+

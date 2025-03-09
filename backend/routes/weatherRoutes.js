@@ -1,6 +1,7 @@
 const express = require("express");
-const {getWeather} =require ("../controllers/weatherController");
+const {getWeatherAndNDVI} =require ("../controllers/weatherController");
+const verifyToken = require('../middlewares/verifyToken.js');
 
 const router = express.Router();
-router.get("/:userId", getWeather);
+router.get("/:userId",verifyToken, getWeatherAndNDVI);
 module.exports = router;

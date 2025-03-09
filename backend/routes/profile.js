@@ -2,7 +2,7 @@ const express = require('express');
 const upload = require('../config/multer');
 const verifyToken = require('../middlewares/verifyToken.js');
 const router = express.Router();
-const User = require('../models/user.js');
+const User = require('../models/User.js');
 const cloudinary = require('../config/cloudinary.js');
 
 router.post('/upload-profile', verifyToken, upload.single('profileImage'), async (req, res) => {

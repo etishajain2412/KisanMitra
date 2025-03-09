@@ -2,13 +2,14 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import WeatherPage from "./pages/WeatherPage";
-import FarmingTipsPage from "./pages/FarmingTipsPage";
+import FarmingTipsPage from "./pages/FarmingTips";
 import MyNavbar from "./components/Navbar";
 
 import Register from './pages/register';
 import Login from './pages/login';
 import Dashboard from './pages/dashboard';
-import Home from './pages/Home';
+
+import HomePage from "./pages/HomePage";
 const App = () => {
   return (
     <Router>
@@ -18,9 +19,9 @@ const App = () => {
         <Route path="/weather" element={<WeatherPage />} />
         <Route path="/farming-tips" element={<FarmingTipsPage />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Dashboard />} />
       </Routes>
     </Router>
   );
