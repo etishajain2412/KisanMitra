@@ -14,7 +14,8 @@ import HomePage from "./pages/HomePage";
 
 import Product from './pages/product';
 import DisplayProducts from './pages/DisplayProduct';
-function App() {
+
+const App = () => {
   return (
     <Router>
       <MyNavbar />
