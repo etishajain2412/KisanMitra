@@ -26,7 +26,7 @@ function Login() {
       });
       console.log(res.data);
       localStorage.setItem('token', res.data.token); // Save token to localStorage
-      navigate('/dashboard'); // Redirect to dashboard after successful login
+      navigate('/'); // Redirect to dashboard after successful login
     } catch (error) {
       console.error('Login failed:', error.response);
       alert('Login failed: ' + error.response.data.message); // Display error message
@@ -34,50 +34,59 @@ function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-bold text-center text-gray-700 mb-6">Login</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email/Username */}
-          <div>
-            <label className="block text-gray-600">Email or Username</label>
-            <input
-              type="text"
-              name="identifier" // This field will accept either email or username
-              placeholder="Enter your email or username"
-              value={formData.identifier}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+    
+    
+      <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
+        <div className="card shadow-lg p-4 border-0" style={{ width: "22rem", borderRadius: "10px" }}>
+          <div className="card-body">
+            {/* Title */}
+            <h2 className="fw-bold text-center text-dark mb-3">Login</h2>
+            <p className="text-muted text-center">Enter your details to sign in</p>
+  
+            {/* Login Form */}
+            <form onSubmit={handleSubmit}>
+              {/* Email/Username */}
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Email or Username</label>
+                <input
+                  type="text"
+                  name="identifier"
+                  placeholder="Enter your email or username"
+                  value={formData.identifier}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+  
+              {/* Password */}
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+  
+              {/* Login Button */}
+              <button type="submit" className="btn btn-primary btn-lg w-100">
+                Login
+              </button>
+            </form>
+  
+            {/* Register Link */}
+            <p className="text-center mt-3">
+              <small>Don't have an account? <a href="/register" className="text-primary">Sign up</a></small>
+            </p>
           </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-gray-600">Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full p-3 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          >
-            Login
-          </button>
-        </form>
+        </div>
       </div>
-    </div>
-  );
+    );
 }
 
 export default Login;
