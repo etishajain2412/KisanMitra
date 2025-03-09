@@ -11,23 +11,24 @@ function Product() {
     category: 'crop',
     stock: 1,
     images: [],
+    isBiddingEnabled: false, // 🔹 New field for bidding
   });
+
   const [previewImages, setPreviewImages] = useState([]);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+
     setProduct((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value, // 🔹 Handle checkbox
     }));
   };
 
-  // 🔹 Keeps previous images and adds new ones
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-
     if (files.length + product.images.length > 5) {
       return alert('You can upload up to 5 images only!');
     }
@@ -41,7 +42,6 @@ function Product() {
     setPreviewImages((prev) => [...prev, ...newPreviews]);
   };
 
-  // 🔹 Remove Image from Preview & State
   const handleRemoveImage = (index) => {
     setProduct((prev) => ({
       ...prev,
@@ -62,9 +62,7 @@ function Product() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!checkToken()) return;
-    if (isSubmitting) return;
+    if (!checkToken() || isSubmitting) return;
 
     setIsSubmitting(true);
     const formData = new FormData();
@@ -74,6 +72,7 @@ function Product() {
     formData.append('price', product.price);
     formData.append('category', product.category);
     formData.append('stock', product.stock);
+    formData.append('isBiddingEnabled', product.isBiddingEnabled); // 🔹 Include bidding option
 
     product.images.forEach((image) => {
       formData.append('images', image);
@@ -99,6 +98,7 @@ function Product() {
         category: 'crop',
         stock: 1,
         images: [],
+        isBiddingEnabled: false, // Reset bidding option
       });
       setPreviewImages([]);
     } catch (error) {
@@ -160,6 +160,18 @@ function Product() {
             className="w-full p-2 mb-4 border rounded"
             required
           />
+
+          {/* 🔹 Bidding Enable Checkbox */}
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              name="isBiddingEnabled"
+              checked={product.isBiddingEnabled}
+              onChange={handleInputChange}
+              className="mr-2"
+            />
+            <label className="text-gray-700">Enable Bidding</label>
+          </div>
 
           {/* File Input */}
           <input

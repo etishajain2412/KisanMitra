@@ -7,6 +7,7 @@ import Dashboard from './pages/dashboard';
 import Home from './pages/Home';
 import Product from './pages/product';
 import DisplayProducts from './pages/DisplayProduct';
+import MyProduct from './pages/MyProduct'
 function App() {
   return (
     <Router>
@@ -17,6 +18,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/display" element={<DisplayProducts />} />
         <Route path="/product" element={<Product />} />
+        <Route path="/my-products" element={<MyProduct />} />
       </Routes>
     </Router>
   );

@@ -157,6 +157,13 @@ function Dashboard() {
         >
           View All Products
         </button>
+         {/* My Products Button */}
+      <button
+        onClick={() => navigate('/my-products')}
+        className="bg-green-500 text-white px-4 py-2 rounded-lg"
+      >
+        My Products
+      </button>
         <button
           onClick={() => navigate('/product')}
           className="w-full p-3 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
