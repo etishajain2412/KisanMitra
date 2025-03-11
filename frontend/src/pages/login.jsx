@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
 
 function Login() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
-    identifier: '',  // This will handle either email or username
+    identifier: '',  // handles email or username
     password: ''
   });
 
-  const navigate = useNavigate(); // Initialize navigate function
+  const navigate = useNavigate();
 
   // Handle input change
   const handleChange = (e) => {
@@ -25,68 +27,68 @@ function Login() {
         headers: { 'Content-Type': 'application/json' },
       });
       console.log(res.data);
-      localStorage.setItem('token', res.data.token); // Save token to localStorage
-      navigate('/'); // Redirect to dashboard after successful login
+      localStorage.setItem('token', res.data.token); // Save token
+      navigate('/'); // Redirect after login
     } catch (error) {
       console.error('Login failed:', error.response);
-      alert('Login failed: ' + error.response.data.message); // Display error message
+      alert(t("login_failed") + ": " + error.response.data.message);
     }
   };
 
   return (
-    
-    
-      <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
-        <div className="card shadow-lg p-4 border-0" style={{ width: "22rem", borderRadius: "10px" }}>
-          <div className="card-body">
-            {/* Title */}
-            <h2 className="fw-bold text-center text-dark mb-3">Login</h2>
-            <p className="text-muted text-center">Enter your details to sign in</p>
+    <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
+      <div className="card shadow-lg p-4 border-0" style={{ width: "22rem", borderRadius: "10px" }}>
+        <div className="card-body">
+          {/* Title */}
+          <h2 className="fw-bold text-center text-dark mb-3">{t("login_title")}</h2>
+          <p className="text-muted text-center">{t("login_subtitle")}</p>
   
-            {/* Login Form */}
-            <form onSubmit={handleSubmit}>
-              {/* Email/Username */}
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Email or Username</label>
-                <input
-                  type="text"
-                  name="identifier"
-                  placeholder="Enter your email or username"
-                  value={formData.identifier}
-                  onChange={handleChange}
-                  className="form-control"
-                  required
-                />
-              </div>
+          {/* Login Form */}
+          <form onSubmit={handleSubmit}>
+            {/* Email/Username */}
+            <div className="mb-3">
+              <label className="form-label fw-semibold">{t("email_or_username")}</label>
+              <input
+                type="text"
+                name="identifier"
+                placeholder={t("enter_email_or_username")}
+                value={formData.identifier}
+                onChange={handleChange}
+                className="form-control"
+                required
+              />
+            </div>
   
-              {/* Password */}
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="form-control"
-                  required
-                />
-              </div>
+            {/* Password */}
+            <div className="mb-3">
+              <label className="form-label fw-semibold">{t("password")}</label>
+              <input
+                type="password"
+                name="password"
+                placeholder={t("enter_password")}
+                value={formData.password}
+                onChange={handleChange}
+                className="form-control"
+                required
+              />
+            </div>
   
-              {/* Login Button */}
-              <button type="submit" className="btn btn-primary btn-lg w-100">
-                Login
-              </button>
-            </form>
+            {/* Login Button */}
+            <button type="submit" className="btn btn-primary btn-lg w-100">
+              {t("login_button")}
+            </button>
+          </form>
   
-            {/* Register Link */}
-            <p className="text-center mt-3">
-              <small>Don't have an account? <a href="/register" className="text-primary">Sign up</a></small>
-            </p>
-          </div>
+          {/* Register Link */}
+          <p className="text-center mt-3">
+            <small>
+              {t("dont_have_account")} <a href="/register" className="text-primary">{t("sign_up")}</a>
+            </small>
+          </p>
         </div>
       </div>
-    );
+    </div>
+  );
 }
 
 export default Login;

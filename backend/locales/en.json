@@ -1,0 +1,31 @@
+
+    {
+        "received_request": "Received request with",
+        "invalid_user_id": "Invalid userId format",
+        "latitude_longitude_required": "Latitude and Longitude are required",
+        "checking_polygon": "Checking if polygon exists in MongoDB...",
+        "polygon_search_result": "Polygon search result:",
+        "no_polygon_found": "No polygon found, creating one...",
+        "saving_polygon_data": "Saving polygon data...",
+        "sending_to_agromonitoring": "Sending data to Agromonitoring API...",
+        "agromonitoring_api_response": "Agromonitoring API Response:",
+        "polygon_saved": "Polygon saved in MongoDB.",
+        "user_id_required": "User ID is required!",
+        "fetching_weather": "Fetching weather for user:",
+        "fetching_polygon": "Searching for user's polygon...",
+      
+        "polygon_missing_id": "Polygon exists but is missing polygonId!",
+        "fetching_weather_api": "Fetching weather from Agromonitoring API...",
+        "fetching_ndvi": "Fetching available NDVI images...",
+        "no_ndvi_data": "No NDVI data available",
+        "latest_ndvi_timestamp": "Latest NDVI available at:",
+        "ndvi_data_fetched": "NDVI Data Fetched:",
+        "weather_data_fetched": "Weather Data Fetched:",
+        "ndvi_healthy": "🌿 Healthy crops! Keep maintaining irrigation and fertilizers.",
+        "ndvi_stressed": "⚠️ Crop stress detected! Check for pests or water issues.",
+        "ndvi_warning": "🚨 Warning: Possible crop failure. Consider replanting or changing practices.",
+        "api_error": "Agromonitoring API Error:"
+      }
+      
+  
+  

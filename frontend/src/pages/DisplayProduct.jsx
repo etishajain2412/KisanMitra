@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 function DisplayProducts() {
   const [products, setProducts] = useState([]);
@@ -91,46 +92,9 @@ function DisplayProducts() {
               <p className="text-green-600 font-bold mt-1">${product.price}</p>
               <p className="text-gray-500 text-sm">Stock: {product.stock}</p>
               <p className="text-gray-500 text-sm">Category: {product.category}</p>
-
-              {/* Show bidding section if bidding is enabled */}
-              {product.isBiddingEnabled && (
-                <div className="mt-4">
-                  <h4 className="font-semibold">Place a Bid</h4>
-                  <input
-                    type="number"
-                    min={product.minBidPrice || 1}
-                    value={bidAmount[product._id] || ''}
-                    onChange={(e) => handleBidChange(e, product._id)}
-                    className="mt-2 w-full p-2 border rounded"
-                    placeholder={`Min Bid: $${product.minBidPrice || 1}`}
-                  />
-                  <button
-                    onClick={() => placeBid(product._id)}
-                    className="mt-2 bg-blue-500 text-white py-2 px-4 rounded"
-                  >
-                    Place Bid
-                  </button>
-
-                  {/* Feedback message */}
-                  {feedback && (
-                    <p className="mt-2 text-sm text-green-500">{feedback}</p>
-                  )}
-
-                  {/* Display all bids for this product */}
-                  {product.bids && product.bids.length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="font-semibold">Current Bids</h4>
-                      <ul>
-                        {product.bids.map((bid, index) => (
-                          <li key={index} className="text-gray-600">
-                            ${bid.amount} by {bid.userId}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
+              <Link to="/payment">
+       <button className="btn btn-success">Proceed to Payment</button>
+      </Link>
             </div>
           ))}
         </div>

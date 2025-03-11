@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Weather from "../components/Weather";
 import {jwtDecode} from "jwt-decode";  
-
+import { useTranslation } from "react-i18next";
 const WeatherPage = () => {
+    const { t } = useTranslation();
     const [userId, setUserId] = useState(null);
   
     useEffect(() => {
@@ -21,11 +22,11 @@ const WeatherPage = () => {
   
     return (
       <div>
-        <h2 className="text-center mt-4">Weather Information</h2>
+        <h2 className="text-center mt-4">{t("weather_info")}</h2>
         {userId ? (
           <Weather userId={userId} />
         ) : (
-          <p className="text-center text-danger">Please log in to view weather data.</p>
+          <p className="text-center text-danger">{t("login_to_view_weather")}</p>
         )}
       </div>
     );

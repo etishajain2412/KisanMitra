@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Container, Row, Col, Card } from "react-bootstrap";
 
 const farmingTips = [
@@ -9,6 +10,7 @@ const farmingTips = [
 ];
 
 const FarmingTips = () => {
+  const { t, i18n } = useTranslation();
   return (
     <Container className="mt-4" id="farming-tips">
       <h2 className="text-center">Farming Calendar</h2>

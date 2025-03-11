@@ -1,0 +1,75 @@
+{
+      "welcome": "Welcome to KisanMitra",
+    "marketplace_description": "Find the best marketplace for farmers",
+    "buy_now": "Buy Now",
+    "sell_products": "Sell Your Products",
+    "weather_forecast": "Weather Forecast",
+
+    "login_title": "Login",
+  "login_subtitle": "Enter your details to sign in",
+  "email_or_username": "Email or Username",
+  "enter_email_or_username": "Enter your email or username",
+ 
+  "enter_password": "Enter your password",
+  "login_button": "Login",
+
+  "brand": "🚜 Kisan Mitra",
+  "home": "Home",
+  "weather": "Weather🌤",
+ 
+  "my_profile": "My Profile",
+  
+ 
+  "login_failed": "Login failed",
+    "login": "Login",
+    "register": "Register",
+    "enter_details": "Enter your details to sign in",
+    "email_username": "Email or Username",
+    "password": "Password",
+    "dont_have_account": "Don't have an account?",
+    "sign_up": "Sign Up",
+    "create_account": "Create an Account",
+    "join_us": "Join us today and explore the platform!",
+    "enter_full_name": "Full Name",
+    "username": "Username",
+    "choose_username": "Choose a username",
+    "email": "Email",
+    "enter_email": "Enter your email",
+    "registration_success": "Registration successful!",
+    "registration_failed": "Registration failed. Please try again.",
+    "create_password": "Create a password",
+    "already_have_account": "Already have an account?",
+    "sign_in": "Sign In",
+
+    
+       
+       
+    "full_name": "Full Name",
+      
+      
+    "add_product": "Add New Product",
+    "product_name": "Product Name",
+    "product_description": "Product Description",
+    "price": "Price",
+    "category": "Category",
+    "stock_quantity": "Stock Quantity",
+    "upload_images": "Upload Images",
+    "adding": "Adding...",
+    "farming_tips": "Farming Calendar",
+    "weather_info": "Weather Information",
+    "login_to_view_weather": "Please log in to view weather data.",
+    "check_weather": "Check Weather",
+    "language_switch": "Switch Language",
+    "agriculture_weather_report": "🌿 Agriculture Weather Report",
+    "location": "Your Location",
+    "feels_like": "Feels like",
+    "wind": "Wind",
+    "humidity": "Humidity",
+    "ndvi_analysis": "NDVI Analysis",
+    "no_ndvi_data": "No NDVI data available.",
+    "no_weather_data": "No weather data available.",
+    "refresh_location": "Refresh Location",
+    "geolocation_not_supported": "Geolocation is not supported by your browser.",
+  "location_detected": "Location detected",
+  "no_description_available": "No description available"
+}
