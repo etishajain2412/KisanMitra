@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import WeatherPage from "./pages/WeatherPage";
 import FarmingTipsPage from "./pages/FarmingTips";
 import MyNavbar from "./components/Navbar";
+import Forum from "./components/Forum.jsx";
 import Register from './pages/register';
 import Login from './pages/login';
 import Dashboard from './pages/dashboard';
@@ -13,6 +14,8 @@ import CartPage from "./pages/CartPage.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
 import PaymentFailure from "./pages/PaymentFailure.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
+import VideoGallery from "./components/VideoGallery";
+import UploadVideo from "./components/UploadVideo";
 import {useState} from 'react';
 const App = () => {
   const [cartItems, setCartItems] = useState([
@@ -34,11 +37,14 @@ const App = () => {
         
         <Route path="/display" element={<DisplayProducts />} />
         <Route path="/product" element={<Product />} />
-        <Route path="/my-products" element={<MyProduct />} />
+        {/* <Route path="/my-products" element={<MyProduct />} /> */}
         <Route path="/cart" element={<CartPage cartItems={cartItems} setCartItems={setCartItems} />} />
         <Route path="/payment" element={<PaymentPage />} /> {/* Add PaymentPage route */}
         <Route path="/payment-success" element={<PaymentSuccess  />} /> {/* Add PaymentPage route */}
         <Route path="/payment-failure" element={<PaymentFailure/>} /> {/* Add PaymentPage route */}
+        <Route path="/forums"  element={<Forum />} />
+        <Route path="/videos" element={<VideoGallery />} />
+                <Route path="/videos/upload" element={<UploadVideo />} />
       </Routes>
     </Router>
   );

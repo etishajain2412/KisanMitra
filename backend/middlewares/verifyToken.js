@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const User = require("../models/User");
 
 const verifyToken = (req, res, next) => {
   // Get the Authorization header
@@ -25,6 +26,15 @@ const verifyToken = (req, res, next) => {
 
     // Attach the user ID to the request object
     req.user = { id: verified.id }; // Ensure the payload contains `id`
+
+    //  // ✅ Fetch user role from DB
+    //  const user = await User.findById(req.user.userId);
+    //  if (!user) {
+    //      return res.status(404).json({ message: "User not found" });
+    //  }
+
+    //  req.user.role = user.role; // ✅ Attach user role
+
     next(); // Proceed to the next middleware/route
   } catch (error) {
     console.error('Token verification error:', error.message); // Debugging

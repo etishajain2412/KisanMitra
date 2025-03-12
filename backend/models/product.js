@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const User = require("./user"); // Assuming user model exists
+const User = require("./User"); // Assuming user model exists
 
 // Review schema
 const reviewSchema = new mongoose.Schema({

@@ -458,3 +458,171 @@ button:hover {
     background: #218838;
 }
 
+/* Forum css */
+/* ✅ Forum Container */
+.forum-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    font-family: "Poppins", sans-serif;
+}
+
+/* ✅ Heading */
+.forum-container h2 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+
+/* ✅ New Post Input Section */
+.new-post {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.new-post input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.new-post button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.new-post button:hover {
+    background: #388e3c;
+}
+
+/* ✅ Discussion Posts */
+.posts {
+    list-style: none;
+    padding: 0;
+}
+
+.post-item {
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #4caf50;
+}
+
+.post-item h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 5px;
+}
+
+.post-item p {
+    font-size: 16px;
+    color: #666;
+}
+
+/* ✅ Answer Section */
+.answer-section {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.answer-section input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.answer-section button {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.answer-section button:hover {
+    background: #1976D2;
+}
+
+/* ✅ Answer List */
+.answers-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.answer-item {
+    background: #f1f1f1;
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 5px;
+
+
+
+}
+
+
+
+/*VideoGallery.css*/
+
+.video-gallery {
+    text-align: center;
+    padding: 20px;
+}
+
+.video-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.video-card {
+    width: 320px;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.video-card:hover {
+    transform: scale(1.05);
+}
+
+.video-card video, .video-card iframe {
+    width: 100%;
+    height: 180px;
+    border-radius: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .video-list {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
