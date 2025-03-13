@@ -9,14 +9,18 @@ import Login from './pages/login';
 import Dashboard from './pages/dashboard';
 import HomePage from "./pages/HomePage";
 import Product from './pages/product';
+import MyProduct from './pages/MyProduct';
 import DisplayProducts from './pages/DisplayProduct';
 import CartPage from "./pages/CartPage.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
+import SuccessStories from "./pages/SuccessStories.jsx";
+import SubmitStory from "./pages/SubmitStory";
 import PaymentFailure from "./pages/PaymentFailure.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import VideoGallery from "./components/VideoGallery";
 import UploadVideo from "./components/UploadVideo";
 import {useState} from 'react';
+
 const App = () => {
   const [cartItems, setCartItems] = useState([
     { id: 1, name: "Product A", price: 500, quantity: 2, image: "https://cdn.agdaily.com/wp-content/uploads/2016/09/wheat.jpg" },
@@ -37,11 +41,13 @@ const App = () => {
         
         <Route path="/display" element={<DisplayProducts />} />
         <Route path="/product" element={<Product />} />
-        {/* <Route path="/my-products" element={<MyProduct />} /> */}
+        <Route path="/my-products" element={<MyProduct />} />
         <Route path="/cart" element={<CartPage cartItems={cartItems} setCartItems={setCartItems} />} />
         <Route path="/payment" element={<PaymentPage />} /> {/* Add PaymentPage route */}
         <Route path="/payment-success" element={<PaymentSuccess  />} /> {/* Add PaymentPage route */}
         <Route path="/payment-failure" element={<PaymentFailure/>} /> {/* Add PaymentPage route */}
+        <Route path="/stories" element={<SuccessStories/>} /> 
+        <Route path="/stories/submit" element={<SubmitStory/>} /> 
         <Route path="/forums"  element={<Forum />} />
         <Route path="/videos" element={<VideoGallery />} />
                 <Route path="/videos/upload" element={<UploadVideo />} />
