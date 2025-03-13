@@ -14,6 +14,7 @@ const productRoutes=require('./routes/product')
 const paymentRoutes = require('./routes/paymentRoutes');
 const forumRoutes = require("./routes/ForumRoutes");
 const videoRoutes = require("./routes/videoRoutes");
+const successRoutes = require("./routes/successRoutes");
 const { initializeSockets } = require("./sockets/socketManager")
 const app = express();
 const server = http.createServer(app);
@@ -72,6 +73,7 @@ app.use("/api/polygon", polygonRoutes);
  app.use('/api/payment', paymentRoutes);
  app.use("/api/forum", forumRoutes);
  app.use("/api/videos", videoRoutes);
+ app.use("/api/success-stories", successRoutes);
  console.log("✅ Routes Registered.");
 
 

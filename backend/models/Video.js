@@ -7,7 +7,7 @@ const VideoSchema = new mongoose.Schema({
     category: { type: String, enum: ["Tutorial", "Webinar"], required: true },
     uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Farmer who uploaded
     views: { type: Number, default: 0 },
-    reviews: { type: Number, default: 0 },
+    // reviews: { type: Number, default: 0 },
     reviews: {
         type: [
             {
