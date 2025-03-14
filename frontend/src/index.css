@@ -838,3 +838,22 @@ button:hover {
     font-size: 16px;
     font-weight: bold;
 }
+
+/*Siddebar*/
+.nav-link {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+  }
+  
+  .nav-link:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .active-link {
+    background-color: #1976d2 !important;
+    color: white !important;
+    border-radius: 5px;
+  }
+  

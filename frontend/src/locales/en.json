@@ -71,5 +71,42 @@
     "refresh_location": "Refresh Location",
     "geolocation_not_supported": "Geolocation is not supported by your browser.",
   "location_detected": "Location detected",
-  "no_description_available": "No description available"
+  "no_description_available": "No description available",
+
+  
+  "submitStory": {
+    "title": "🌱 Share Your Success Story",
+    "storyTitle": "📌 Title of Your Story",
+    "storyTitlePlaceholder": "Story Title",
+    "yourName": "👨‍🌾 Your Name (Optional)",
+    "yourNamePlaceholder": "Your Name (or leave blank for Anonymous)",
+    "subHeading": "✨ Sub-Heading",
+    "subHeadingPlaceholder": "Short Sub-Heading",
+    "storyJourney": "📖 Your Journey",
+    "storyJourneyPlaceholder": "Write your story in multiple paragraphs...",
+    "imageUpload": "📷 Add an Image (Optional)",
+    "imageUploadPlaceholder": "Image URL (Optional)",
+    "previewButton": "Preview Story",
+    "hidePreviewButton": "Hide Preview",
+    "submitButton": "Submit Story",
+    "loading": "Submitting...",
+    "successMessage": "🎉 Story submitted successfully!",
+    "errorMessage": "Failed to submit story. Please try again."
+  },
+  
+   
+     "successStories": {
+    "title": "🌾 Success Stories of Farmers",
+    "shareStoryButton": "✍️ Share Your Story",
+    "noStories": "No stories available. Be the first to share one!",
+    "like": "",
+    "comment": "Comment",
+    "writeCommentPlaceholder": "Write a comment...",
+    "showComments": "Show Comments",
+    "hideComments": "Hide Comments",
+    "submitComment": "Submit",
+    "errorComment": "❌ Error submitting comment.",
+    "loginToLike": "You must be logged in to like a story."
+  }
+  
 }

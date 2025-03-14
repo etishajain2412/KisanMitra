@@ -12,9 +12,13 @@ import {
     Divider,
     Box
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
+
 import { CloudUpload as CloudUploadIcon, Preview as PreviewIcon } from "@mui/icons-material";
 
 const SubmitStory = () => {
+    const { t } = useTranslation();
+
     const [title, setTitle] = useState("");
     const [subHeading, setSubHeading] = useState("");
     const [description, setDescription] = useState("");
@@ -36,8 +40,8 @@ const SubmitStory = () => {
 
         try {
             const token = localStorage.getItem("token"); // ✅ Ensure user is authenticated
-            if (!token) {
-                alert("You need to be logged in to submit a story!");
+            if (!token){
+                alert(t("submitStory.errorMessage"));
                 setLoading(false);
                 return;
             }
@@ -46,7 +50,7 @@ const SubmitStory = () => {
                 subHeading,
                 description,
                 imageUrl,
-                farmerName: farmerName || "Anonymous", // ✅ Send user input, or default to Anonymous
+                farmerName: farmerName ||  t("submitStory.anonymous"), // ✅ Send user input, or default to Anonymous
             };
             console.log("📩 Sending Story Data:", storyData);
 
@@ -56,11 +60,11 @@ const SubmitStory = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            alert("🎉 Story submitted successfully!");
+            alert(t("submitStory.successMessage"));
             navigate("/stories"); // ✅ Redirect to success stories page
         } catch (error) {
             console.error("❌ Error submitting story:", error);
-            alert("Failed to submit story. Please try again.");
+            alert(t("submitStory.errorMessage"));
         } finally {
             setLoading(false);
         }
@@ -72,17 +76,17 @@ const SubmitStory = () => {
             <Card sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
                 <CardContent>
                     <Typography variant="h4" align="center" gutterBottom>
-                        🌱 Share Your Success Story
+                        🌱     {t("submitStory.title")}
                     </Typography>
                     <Divider sx={{ mb: 3 }} />
 
                     <form onSubmit={handleSubmit} className="submit-story-form">
                         {/* Story Title */}
                         <Typography variant="h6" gutterBottom>
-                            📌 Title of Your Story
+                        {t("submitStory.storyTitle")}
                         </Typography>
                         <TextField
-                            label="Story Title"
+                            label={t("submitStory.storyTitlePlaceholder")}
                             variant="outlined"
                             fullWidth
                             value={title}
@@ -93,10 +97,10 @@ const SubmitStory = () => {
 
                         {/* Farmer's Name Field */}
                         <Typography variant="h6" gutterBottom>
-                            👨‍🌾 Your Name (Optional)
+                        {t("submitStory.yourName")}
                         </Typography>
                         <TextField
-                            label="Your Name (or leave blank for Anonymous)"
+                            label={t("submitStory.yourNamePlaceholder")}
                             variant="outlined"
                             fullWidth
                             value={farmerName}
@@ -107,10 +111,10 @@ const SubmitStory = () => {
 
                         {/* Sub-Heading */}
                         <Typography variant="h6" gutterBottom>
-                            ✨ Sub-Heading
+                        {t("submitStory.subHeading")}
                         </Typography>
                         <TextField
-                            label="Short Sub-Heading"
+                            label={t("submitStory.subHeadingPlaceholder")}
                             variant="outlined"
                             fullWidth
                             value={subHeading}
@@ -121,10 +125,10 @@ const SubmitStory = () => {
 
                         {/* Main Story */}
                         <Typography variant="h6" gutterBottom>
-                            📖 Your Journey
+                        {t("submitStory.storyJourney")}
                         </Typography>
                         <TextField
-                            label="Write your story in multiple paragraphs..."
+                            label={t("submitStory.storyJourneyPlaceholder")}
                             variant="outlined"
                             multiline
                             rows={6}
@@ -137,10 +141,10 @@ const SubmitStory = () => {
 
                         {/* Image Upload */}
                         <Typography variant="h6" gutterBottom>
-                            📷 Add an Image (Optional)
+                        {t("submitStory.imageUpload")}
                         </Typography>
                         <TextField
-                            label="Image URL (Optional)"
+                            label={t("submitStory.imageUploadPlaceholder")}
                             variant="outlined"
                             fullWidth
                             value={imageUrl}
@@ -164,7 +168,7 @@ const SubmitStory = () => {
                             onClick={() => setPreview(!preview)}
                             sx={{ mb: 3 }}
                         >
-                            {preview ? "Hide Preview" : "Preview Story"}
+                           {preview ? t("submitStory.hidePreviewButton") : t("submitStory.previewButton")}
                         </Button>
 
                         {/* Story Preview */}
@@ -179,10 +183,10 @@ const SubmitStory = () => {
                                 }}
                             >
                                 <Typography variant="h5" gutterBottom>
-                                    {title || "Your Story Title"}
+                                {title || t("submitStory.storyTitlePlaceholder")}
                                 </Typography>
                                 <Typography variant="subtitle1" gutterBottom color="gray">
-                                    {subHeading || "Sub-heading will appear here..."}
+                                    {subHeading ||  t("submitStory.subHeadingPlaceholder")}
                                 </Typography>
                                 {imageUrl && (
                                     <img
@@ -198,7 +202,7 @@ const SubmitStory = () => {
                                     />
                                 )}
                                 <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
-                                    {description || "Your formatted story will appear here..."}
+                                    {description || t("submitStory.storyJourneyPlaceholder")}
                                 </Typography>
                             </Box>
                         )}
@@ -212,7 +216,7 @@ const SubmitStory = () => {
                             sx={{ py: 1.5, fontSize: "16px" }}
                             disabled={loading}
                         >
-                            {loading ? <CircularProgress size={24} /> : "Submit Story"}
+                            {loading ? <CircularProgress size={24} /> :t("submitStory.submitButton")}
                         </Button>
                     </form>
                 </CardContent>

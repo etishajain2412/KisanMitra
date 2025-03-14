@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import WeatherPage from "./pages/WeatherPage";
 import FarmingTipsPage from "./pages/FarmingTips";
-import MyNavbar from "./components/Navbar";
+import MyNavbar from "./components/Layout/Navbar.jsx";
 import Forum from "./components/Forum.jsx";
 import Register from './pages/register';
 import Login from './pages/login';
@@ -19,6 +19,8 @@ import PaymentFailure from "./pages/PaymentFailure.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import VideoGallery from "./components/VideoGallery";
 import UploadVideo from "./components/UploadVideo";
+
+
 import {useState} from 'react';
 
 const App = () => {
@@ -30,6 +32,7 @@ const App = () => {
   return (
     <Router>
       <MyNavbar />
+     
       <Routes>
         
         <Route path="/weather" element={<WeatherPage />} />
