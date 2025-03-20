@@ -19,7 +19,7 @@ import PaymentFailure from "./pages/PaymentFailure.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import VideoGallery from "./components/VideoGallery";
 import UploadVideo from "./components/UploadVideo";
-
+import News from "./pages/News.jsx";
 
 import {useState} from 'react';
 
@@ -54,6 +54,7 @@ const App = () => {
         <Route path="/forums"  element={<Forum />} />
         <Route path="/videos" element={<VideoGallery />} />
                 <Route path="/videos/upload" element={<UploadVideo />} />
+                <Route path='/news' element={<News/>}/>
       </Routes>
     </Router>
   );

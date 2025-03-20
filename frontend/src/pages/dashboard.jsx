@@ -100,13 +100,13 @@ function Dashboard() {
   };
 
   return (
-    <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100'>
+    <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6'>
       <div className='w-full max-w-md p-8 bg-white shadow-lg rounded-lg'>
         <h2 className='text-3xl font-bold text-center text-gray-700 mb-4'>Welcome to Your Dashboard</h2>
         <p className='text-center text-gray-600 mb-4'>You're logged in successfully!</p>
 
         {/* Profile Picture Section */}
-        <div className='flex flex-col items-center mb-4'>
+        <div className='flex flex-col items-center mb-6'>
           {profilePic ? (
             <img
               src={profilePic}
@@ -131,45 +131,66 @@ function Dashboard() {
           </button>
         </div>
 
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className='w-full p-3 mt-4 bg-red-500 text-white rounded-lg hover:bg-red-600'
-        >
-          Logout
-        </button>
+        {/* Buttons Section */}
+        <div className='flex flex-col space-y-3'>
+          <div>
+            <button
+              onClick={() => navigate('/display')}
+              className='w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600'
+            >
+              View All Products
+            </button>
+          </div>
 
-        {/* Remove Profile Picture Button */}
-        {profilePic && (
-          <button
-            onClick={handleRemovePicture}
-            className='mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600'
-          >
-            Remove Profile Picture
-          </button>
+          <div>
+            <button
+              onClick={() => navigate('/my-products')}
+              className='w-full p-3 bg-green-500 text-white rounded-lg hover:bg-green-600'
+            >
+              My Products
+            </button>
+          </div>
 
-        )}
+          <div>
+            <button
+              onClick={() => navigate('/product')}
+              className='w-full p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600'
+            >
+              Add Product
+            </button>
+          </div>
 
-        {message && <p className='text-center mt-2 text-green-500'>{message}</p>}
-        <button
-          onClick={() => navigate('/display')}
-          className="w-full p-3 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          View All Products
-        </button>
-         {/* My Products Button */}
-      <button
-        onClick={() => navigate('/my-products')}
-        className="bg-green-500 text-white px-4 py-2 rounded-lg"
-      >
-        My Products
-      </button>
-        <button
-          onClick={() => navigate('/product')}
-          className="w-full p-3 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          Add Product
-        </button>
+          <div>
+            <button
+              onClick={() => navigate('/news')} // Navigate to /news
+              className='w-full p-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600'
+            >
+              View News
+            </button>
+          </div>
+
+          <div>
+            <button
+              onClick={handleLogout}
+              className='w-full p-3 bg-red-500 text-white rounded-lg hover:bg-red-600'
+            >
+              Logout
+            </button>
+          </div>
+
+          {profilePic && (
+            <div>
+              <button
+                onClick={handleRemovePicture}
+                className='w-full p-3 bg-red-500 text-white rounded-lg hover:bg-red-600'
+              >
+                Remove Profile Picture
+              </button>
+            </div>
+          )}
+        </div>
+
+        {message && <p className='text-center mt-4 text-green-500'>{message}</p>}
       </div>
     </div>
   );
