@@ -1,216 +1,230 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-function MyProduct() {
+const MyProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [editableProduct, setEditableProduct] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [error, setError] = useState("");
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editedProduct, setEditedProduct] = useState({});
 
   useEffect(() => {
+    const fetchMyProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/products/myProducts", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setProducts(response.data);
+      } catch (error) {
+        setError("Failed to load your products");
+      }
+      setLoading(false);
+    };
+
     fetchMyProducts();
   }, []);
 
-  const fetchMyProducts = async () => {
+  const handleDelete = async (productId) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
     try {
-      const res = await axios.get('http://localhost:5000/api/products/myProducts', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+      await axios.delete(`http://localhost:5000/api/products/delete/${productId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setProducts(res.data);
-    } catch (err) {
-      setError('Failed to fetch products.');
-    } finally {
-      setLoading(false);
+      setProducts(products.filter((product) => product._id !== productId));
+    } catch (error) {
+      setError("Error deleting product");
     }
   };
 
-  const handleChange = (e, productId) => {
-    const { name, value, type, checked } = e.target;
-    setEditableProduct((prevState) => ({
-      ...prevState,
-      [name]: type === 'checkbox' ? checked : value,
-      _id: productId,
-    }));
-  };
-
-  const handleSave = async () => {
+  const toggleBidding = async (productId, isBiddingEnabled, minimumBidAmount) => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/products/updateProduct/${editableProduct._id}`,
-        editableProduct,
+      const response = await axios.put(
+        `http://localhost:5000/api/products/toggleBidding/${productId}`,
+        { isBiddingEnabled, minimumBidAmount },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-      fetchMyProducts(); // Refresh the products
-      setEditableProduct(null); // Reset editing state
-    } catch (err) {
-      setError('Failed to save changes.');
-    }
-  };
-
-  const handleSellToBidders = async (productId, stock) => {
-    try {
-      const res = await axios.post(
-        `http://localhost:5000/api/products/sellToHighestBidder/${productId}`,
-        { stock },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
 
-      fetchMyProducts(); // Refresh the products
-      setSuccessMessage(res.data.buyers.join('\n')); // Display buyers who got the product
-    } catch (err) {
-      alert('Failed to complete the sale.');
+      setProducts(
+        products.map((product) =>
+          product._id === productId ? { ...product, ...response.data.product } : product
+        )
+      );
+    } catch (error) {
+      setError("Error updating bidding status");
     }
   };
+
+  const handleEdit = (product) => {
+    setEditingProductId(product._id);
+    setEditedProduct({ ...product });
+  };
+
+  const handleUpdate = async (productId) => {
+    try {
+      const formData = new FormData();
+      formData.append("name", editedProduct.name);
+      formData.append("description", editedProduct.description);
+      formData.append("price", editedProduct.price);
+      formData.append("stock", editedProduct.stock);
+      
+      if (editedProduct.images && editedProduct.images.length > 0) {
+        for (let image of editedProduct.images) {
+          formData.append("images", image);
+        }
+      }
+  
+      const response = await axios.put(
+        `http://localhost:5000/api/products/update/${productId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
+      setProducts(
+        products.map((product) =>
+          product._id === productId ? { ...product, ...response.data.product } : product
+        )
+      );
+  
+      setEditingProductId(null);
+    } catch (error) {
+      setError("Error updating product");
+    }
+  };
+  
+  if (loading) return <p className="text-center text-gray-500">Loading your products...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">My Products</h2>
+    <div className="container mx-auto p-6">
+      <h2 className="text-2xl font-bold text-gray-700 mb-4">My Products</h2>
 
-      {successMessage && (
-        <div className="bg-green-500 text-white p-3 rounded mb-4">
-          {successMessage.split('\n').map((msg, index) => (
-            <p key={index}>{msg}</p>
-          ))}
-        </div>
-      )}
-
-      {loading ? (
-        <p>Loading products...</p>
-      ) : error ? (
-        <p className="text-red-500">{error}</p>
-      ) : products.length === 0 ? (
-        <p>No products added yet.</p>
+      {products.length === 0 ? (
+        <p className="text-center text-gray-500">No products added yet.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <div key={product._id} className="p-4 border rounded-lg shadow-md">
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-40 object-cover rounded-md"
-              />
-              {editableProduct && editableProduct._id === product._id ? (
+            <div key={product._id} className="bg-white shadow-md rounded-lg p-4">
+              {product.images.length > 0 ? (
+                <img src={product.images[0]} alt={product.name} className="w-full h-40 object-cover rounded-md" />
+              ) : (
+                <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+                  No Image
+                </div>
+              )}
+
+              {editingProductId === product._id ? (
                 <>
                   <input
                     type="text"
-                    name="name"
-                    value={editableProduct.name}
-                    onChange={(e) => handleChange(e, product._id)}
-                    className="w-full p-2 mt-2 border rounded"
-                    placeholder="Product Name"
+                    value={editedProduct.name}
+                    onChange={(e) => setEditedProduct({ ...editedProduct, name: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded mt-2"
                   />
                   <textarea
-                    name="description"
-                    value={editableProduct.description}
-                    onChange={(e) => handleChange(e, product._id)}
-                    className="w-full p-2 mt-2 border rounded"
-                    placeholder="Description"
+                    value={editedProduct.description}
+                    onChange={(e) => setEditedProduct({ ...editedProduct, description: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded mt-2"
+                  ></textarea>
+                  <input
+                    type="number"
+                    value={editedProduct.price}
+                    onChange={(e) => setEditedProduct({ ...editedProduct, price: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded mt-2"
                   />
                   <input
                     type="number"
-                    name="price"
-                    value={editableProduct.price}
-                    onChange={(e) => handleChange(e, product._id)}
-                    className="w-full p-2 mt-2 border rounded"
-                    placeholder="Price"
+                    value={editedProduct.stock}
+                    onChange={(e) => setEditedProduct({ ...editedProduct, stock: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded mt-2"
                   />
-                  <input
-                    type="text"
-                    name="category"
-                    value={editableProduct.category}
-                    onChange={(e) => handleChange(e, product._id)}
-                    className="w-full p-2 mt-2 border rounded"
-                    placeholder="Category"
-                  />
-                  <input
-                    type="number"
-                    name="stock"
-                    value={editableProduct.stock}
-                    onChange={(e) => handleChange(e, product._id)}
-                    className="w-full p-2 mt-2 border rounded"
-                    placeholder="Stock"
-                  />
-                  <div className="flex items-center mt-2">
-                    <input
-                      type="checkbox"
-                      name="isBiddingEnabled"
-                      checked={editableProduct.isBiddingEnabled}
-                      onChange={(e) => handleChange(e, product._id)}
-                      className="mr-2"
-                    />
-                    <span>Enable Bidding</span>
-                  </div>
-
-                  {editableProduct.isBiddingEnabled && (
-                    <input
-                      type="number"
-                      name="minBidPrice"
-                      value={editableProduct.minBidPrice}
-                      onChange={(e) => handleChange(e, product._id)}
-                      className="w-full p-2 mt-2 border rounded"
-                      placeholder="Minimum Bid Price"
-                    />
-                  )}
+<input
+  type="file"
+  multiple
+  accept="image/*"
+  onChange={(e) =>
+    setEditedProduct({ ...editedProduct, images: Array.from(e.target.files) })
+  }
+  className="w-full p-2 border border-gray-300 rounded mt-2"
+/>
 
                   <button
-                    onClick={handleSave}
-                    className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
+                    onClick={() => handleUpdate(product._id)}
+                    className="mt-2 bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded"
                   >
-                    Save Changes
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingProductId(null)}
+                    className="mt-2 ml-2 bg-gray-600 hover:bg-gray-700 text-white py-1 px-3 rounded"
+                  >
+                    Cancel
                   </button>
                 </>
               ) : (
                 <>
-                  <h3 className="text-lg font-semibold mt-2">{product.name}</h3>
-                  <p className="text-gray-600">{product.description}</p>
-                  <p className="text-green-600 font-bold mt-1">₹{product.price}</p>
-                  <p className="text-gray-500">Stock: {product.stock}</p>
-                  <p className="text-gray-400 text-sm">Category: {product.category}</p>
+                  <h3 className="text-lg font-bold mt-2">{product.name}</h3>
+                  <p className="text-gray-600 text-sm">{product.description}</p>
 
-                  {product.isBiddingEnabled && product.bids.length > 0 && (
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-lg font-semibold text-purple-600">₹{product.price}</span>
+                    <span className="text-sm text-gray-500">Stock: {product.stock}</span>
+                  </div>
+
+                  {product.isBiddingEnabled ? (
                     <div className="mt-2">
-                      <h4 className="text-lg font-semibold">Bidders:</h4>
-                      {product.bids
-                        .sort((a, b) => b.bidAmount - a.bidAmount)
-                        .map((bid) => (
-                          <div key={bid._id} className="border-t pt-2 mt-2">
-                            <p className="font-semibold">{bid.userId.name}</p>
-                            <p className="text-green-500">Bid: ₹{bid.bidAmount}</p>
-                            <p className="text-gray-500">Email: {bid.userId.email}</p>
-                            <p className="text-gray-400 text-sm">
-                              Date: {new Date(bid.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        ))}
+                      <p className="text-sm text-green-600">Bidding Enabled | Min Bid: ₹{product.minimumBidAmount}</p>
+                      <button
+                        onClick={() => toggleBidding(product._id, false, 0)}
+                        className="mt-2 bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded"
+                      >
+                        Disable Bidding
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-2">
+                      <input
+                        type="number"
+                        placeholder="Min Bid Amount"
+                        className="w-full p-2 border border-gray-300 rounded"
+                        onChange={(e) =>
+                          setProducts(
+                            products.map((p) =>
+                              p._id === product._id ? { ...p, tempMinBid: e.target.value } : p
+                            )
+                          )
+                        }
+                      />
+                      <button
+                        onClick={() => toggleBidding(product._id, true, product.tempMinBid || 0)}
+                        className="mt-2 bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded"
+                      >
+                        Enable Bidding
+                      </button>
                     </div>
                   )}
 
-                  {product.isBiddingEnabled && !product.sold && (
+                  <div className="flex gap-2 mt-3">
                     <button
-                      onClick={() => handleSellToBidders(product._id, product.stock)}
-                      className="mt-4 bg-green-500 text-white py-2 px-4 rounded"
+                      onClick={() => handleEdit(product)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
                     >
-                      Sell to Highest Bidders
+                      Edit
                     </button>
-                  )}
-
-                  <button
-                    onClick={() => setEditableProduct(product)}
-                    className="mt-4 bg-gray-500 text-white py-2 px-4 rounded"
-                  >
-                    Edit Product
-                  </button>
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-md"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -219,6 +233,6 @@ function MyProduct() {
       )}
     </div>
   );
-}
+};
 
-export default MyProduct;
+export default MyProducts;

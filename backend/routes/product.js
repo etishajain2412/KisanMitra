@@ -1,14 +1,14 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs'); // Import fs to delete files
+const fs = require('fs');
 const verifyToken = require('../middlewares/verifyToken');
 const cloudinary = require('../config/cloudinary');
 const Product = require('../models/product');
 
 const router = express.Router();
 
-// Multer storage (Temporary storage before Cloudinary upload)
+// 🔹 Multer temporary storage before Cloudinary upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/'); // Temporary folder
@@ -23,39 +23,54 @@ const upload = multer({ storage: storage });
 // 🔹 Add Product Route
 router.post('/addProduct', verifyToken, upload.array('images', 5), async (req, res) => {
   try {
-    const { name, description, price, category, stock, isBiddingEnabled } = req.body;
+    const { name, description, price, category, stock, isBiddingEnabled,minimumBidAmount } = req.body;
 
-    const images = req.files;
-
-    if (!images || images.length === 0) {
-      return res.status(400).json({ message: 'No images uploaded' });
+    // 🔹 Validate required fields
+    if (!name || !description || !price || !category) {
+      return res.status(400).json({ message: 'All required fields must be provided.' });
     }
 
-    // 🔹 Upload images to Cloudinary
-    const imageUploadPromises = images.map(async (image) => {
-      const result = await cloudinary.uploader.upload(image.path, {
-        folder: 'agriculture-products',
-      });
-      // Remove the file from the local uploads folder after Cloudinary upload
-      fs.unlinkSync(image.path);
-      return result.secure_url;
-    });
+    if (isNaN(price) || price <= 0) {
+      return res.status(400).json({ message: 'Invalid price. Must be a positive number.' });
+    }
 
-    const imageUrls = await Promise.all(imageUploadPromises);
+    if (stock && isNaN(stock)) {
+      return res.status(400).json({ message: 'Invalid stock value.' });
+    }
 
-    // 🔹 Convert isBiddingEnabled to Boolean (in case it's coming as a string)
+    // 🔹 Convert data to proper types
     const biddingEnabled = isBiddingEnabled === 'true' || isBiddingEnabled === true;
+    const stockValue = stock ? parseInt(stock) : 1;
+    const priceValue = parseFloat(price);
+
+    // 🔹 Handle Image Upload (Optional)
+    let imageUrls = [];
+    if (req.files && req.files.length > 0) {
+      const imageUploadPromises = req.files.map(async (image) => {
+        try {
+          const result = await cloudinary.uploader.upload(image.path, { folder: 'agriculture-products' });
+          fs.unlinkSync(image.path); // Remove file from local storage
+          return result.secure_url;
+        } catch (err) {
+          console.error('Cloudinary Upload Error:', err);
+          return null;
+        }
+      });
+
+      imageUrls = (await Promise.all(imageUploadPromises)).filter(url => url !== null);
+    }
 
     // 🔹 Save product in DB
     const newProduct = new Product({
       name,
       description,
-      price,
+      price: priceValue,
       category,
-      stock,
+      stock: stockValue,
       sellerId: req.user.id,
       images: imageUrls,
-      isBiddingEnabled: biddingEnabled, // Controlled by form input
+      isBiddingEnabled: biddingEnabled,
+      minimumBidAmount
     });
 
     await newProduct.save();
@@ -63,13 +78,200 @@ router.post('/addProduct', verifyToken, upload.array('images', 5), async (req, r
       message: 'Product added successfully',
       product: newProduct,
     });
+
   } catch (error) {
     console.error('Error adding product:', error);
-    res.status(500).json({ message: 'Error adding product', error: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
+router.get("/getProducts", async (req, res) => {
+  try {
+    const products = await Product.find()
+      .populate("sellerId", "name email") // Fetch seller info (optional)
+      .select("name description price stock images category isBiddingEnabled minimumBidAmount");
 
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Error fetching products", error: error.message });
+  }
+});
+router.get("/getProduct/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json(product);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+router.post("/placeBid/:productId", verifyToken, async (req, res) => {
+  try {
+    const { bidAmount, quantity } = req.body;
+    const product = await Product.findById(req.params.productId);
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    if (!product.isBiddingEnabled) {
+      return res.status(400).json({ message: "Bidding is not enabled for this product" });
+    }
+
+    if (bidAmount < product.minimumBidAmount) {
+      return res.status(400).json({ message: `Bid amount must be at least ₹${product.minimumBidAmount}` });
+    }
+
+    // Check if user already placed a bid
+    const existingBidIndex = product.bids.findIndex((bid) => bid.userId.toString() === req.user.id);
+
+    if (existingBidIndex !== -1) {
+      // Update existing bid
+      product.bids[existingBidIndex].bidAmount = bidAmount;
+      product.bids[existingBidIndex].quantity = quantity;
+      product.bids[existingBidIndex].updatedAt = new Date();
+    } else {
+      // Place a new bid
+      product.bids.push({ userId: req.user.id, bidAmount, quantity, createdAt: new Date() });
+    }
+
+    await product.save();
+
+    // Sort bids: user's bid first, then highest to lowest bid
+    product.bids.sort((a, b) => (a.userId.toString() === req.user.id ? -1 : b.bidAmount - a.bidAmount));
+
+    res.status(201).json({ message: "Bid placed/updated successfully", product });
+  } catch (error) {
+    res.status(500).json({ message: "Error placing bid", error: error.message });
+  }
+});
+
+/* =============================================================
+   ✅ GET USER'S PRODUCTS (For My Products page)
+================================================================ */
+router.get("/myProducts", verifyToken, async (req, res) => {
+  try {
+    const products = await Product.find({ sellerId: req.user.id }).sort({ createdAt: -1 });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching user's products", error: error.message });
+  }
+});
+
+/* =============================================================
+   ✅ DELETE PRODUCT
+================================================================ */
+router.delete("/delete/:id", verifyToken, async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    if (product.sellerId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    await product.deleteOne();
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting product", error: error.message });
+  }
+});
+
+/* =============================================================
+   ✅ UPDATE PRODUCT DETAILS
+================================================================ */
+
+router.put("/update/:id", upload.array("images", 5), async (req, res) => {
+  try {
+    const productId = req.params.id;
+    if (!productId) {
+      return res.status(400).json({ message: "Product ID is required" });
+    }
+
+    const { name, description, price, stock, imagesToDelete } = req.body;
+    if (!name || !description || !price || !stock) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    let imageUrls = [];
+
+    // Handle new images upload
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(async (file) => {
+        try {
+          const result = await cloudinary.uploader.upload(file.path, { folder: "agriculture-products" });
+          fs.unlinkSync(file.path); // Remove file from local storage after upload
+          return result.secure_url;
+        } catch (error) {
+          console.error("Cloudinary Upload Error:", error);
+          return null;
+        }
+      });
+
+      imageUrls = (await Promise.all(uploadPromises)).filter((url) => url !== null);
+    }
+
+    // Find the existing product
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    let updatedImages = [...existingProduct.images];
+
+    // Delete selected images from Cloudinary if requested
+    if (imagesToDelete && imagesToDelete.length > 0) {
+      const imagesArray = Array.isArray(imagesToDelete) ? imagesToDelete : [imagesToDelete];
+
+      for (let imageUrl of imagesArray) {
+        const publicId = imageUrl.split("/").pop().split(".")[0]; // Extract Cloudinary public ID
+        await cloudinary.uploader.destroy(`agriculture-products/${publicId}`);
+        updatedImages = updatedImages.filter((img) => img !== imageUrl);
+      }
+    }
+
+    // Merge new images with existing ones
+    updatedImages = [...updatedImages, ...imageUrls];
+
+    // Update product
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      { name, description, price, stock, images: updatedImages },
+      { new: true }
+    );
+
+    res.json({ product: updatedProduct });
+  } catch (error) {
+    console.error("Update Product Error:", error);
+    res.status(500).json({ message: "Error updating product" });
+  }
+});
+/* =============================================================
+   ✅ ENABLE/DISABLE BIDDING
+================================================================ */
+router.put("/toggleBidding/:id", verifyToken, async (req, res) => {
+  try {
+    const { isBiddingEnabled, minimumBidAmount } = req.body;
+    const product = await Product.findById(req.params.id);
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    if (product.sellerId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    product.isBiddingEnabled = isBiddingEnabled;
+    product.minimumBidAmount = isBiddingEnabled ? minimumBidAmount : 0;
+
+    await product.save();
+    res.status(200).json({ message: "Bidding updated successfully", product });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating bidding status", error: error.message });
+  }
+});
 // 🔹 Display Products Route
 router.get('/display', async (req, res) => {
   try {
@@ -80,18 +282,6 @@ router.get('/display', async (req, res) => {
   }
 });
 
-router.get('/myProducts', verifyToken, async (req, res) => {
-  try {
-    const  userId  = req.user.id; // Get logged-in user's ID
-
-    const products = await Product.find({ sellerId: userId }); // Fetch user's products
-
-    res.status(200).json(products);
-  } catch (error) {
-    console.error('Error fetching user products:', error);
-    res.status(500).json({ message: 'Error fetching products', error: error.message });
-  }
-});
 
 router.put('/updateProduct/:id', async (req, res) => {
   try {
@@ -132,51 +322,58 @@ router.put('/updateProduct/:id', async (req, res) => {
 // GET /api/products/bids/:productId
 router.get("/bids/:productId", verifyToken, async (req, res) => {
   try {
-    const product = await Product.findById(req.params.productId).populate("bids.userId", "name email");
+    const product = await Product.findById(req.params.productId)
+      .populate("bids.userId", "name"); // Populate user details
+
     if (!product || !product.bids.length) {
       return res.status(404).json({ message: "No bids found for this product." });
     }
+
     res.status(200).json(product.bids);
   } catch (error) {
     console.error("Error fetching bids:", error);
-    res.status(500).json({ message: "Failed to fetch bids." });
+    res.status(500).json({ error: "Failed to fetch bids." });
   }
 });
-// POST /api/products/bid/:productId
-router.post('/bid/:productId', verifyToken, async (req, res) => {
+
+// 🔹 Place or update a bid (inside product schema)
+router.post("/bid/:productId", verifyToken, async (req, res) => {
   try {
-    const amount = req.body.amount; // Ensure you're extracting 'amount' correctly
+    const { amount, quantity } = req.body;
+    const userId = req.user.id;
     const product = await Product.findById(req.params.productId);
-console.log(amount,product)
+
     if (!product) {
-      return res.status(404).json({ message: 'Product not found.' });
+      return res.status(404).json({ error: "Product not found" });
     }
-
     if (!product.isBiddingEnabled) {
-      return res.status(400).json({ message: 'Bidding is not enabled for this product.' });
+      return res.status(400).json({ error: "Bidding is not enabled for this product" });
+    }
+    if (!amount || amount <= product.highestBid || quantity <= 0) {
+      return res.status(400).json({ error: "Invalid bid amount or quantity" });
     }
 
-    // Find the highest bid for the product
-    const highestBid = product.bids.sort((a, b) => b.amount - a.amount)[0];
-
-    if (highestBid && amount <= highestBid.amount) {
-      return res.status(400).json({ message: 'Your bid must be higher than the current highest bid.' });
+    // Check if user already placed a bid
+    const existingBid = product.bids.find(bid => bid.userId.toString() === userId);
+    
+    if (existingBid) {
+      // Update bid
+      existingBid.bidAmount = amount;
+      existingBid.quantity = quantity;
+      existingBid.createdAt = new Date();
+    } else {
+      // Add new bid
+      product.bids.push({ userId, bidAmount: amount, quantity });
     }
 
-    // Create a new bid
-    const newBid = {
-      userId: req.user.id,
-      bidAmount:amount,
-    };
-
-    // Add the new bid to the product's bids array
-    product.bids.push(newBid);
+    // Update highest bid
+    product.updateHighestBid();
     await product.save();
 
-    res.status(201).json({ message: 'Bid placed successfully.', bid: newBid });
-  } catch (err) {
-    console.error('Error placing bid:', err);
-    res.status(500).json({ message: 'Failed to place bid.' });
+    res.status(200).json({ message: "Bid placed successfully", highestBid: product.highestBid });
+  } catch (error) {
+    console.error("Error placing bid:", error);
+    res.status(500).json({ error: "Failed to place bid" });
   }
 });
 

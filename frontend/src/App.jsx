@@ -10,7 +10,7 @@ import Dashboard from './pages/dashboard';
 import HomePage from "./pages/HomePage";
 import Product from './pages/product';
 import MyProduct from './pages/MyProduct';
-import DisplayProducts from './pages/DisplayProduct';
+import ProductsList from './pages/ProductsList.jsx';
 import CartPage from "./pages/CartPage.jsx";
 import PaymentPage from "./pages/PaymentPage.jsx";
 import SuccessStories from "./pages/SuccessStories.jsx";
@@ -18,6 +18,7 @@ import SubmitStory from "./pages/SubmitStory";
 import PaymentFailure from "./pages/PaymentFailure.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import VideoGallery from "./components/VideoGallery";
+import ProductDetails from "./pages/ProductDetails";
 import UploadVideo from "./components/UploadVideo";
 import News from "./pages/News.jsx";
 
@@ -41,8 +42,8 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Dashboard />} />
-        
-        <Route path="/display" element={<DisplayProducts />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/display" element={<ProductsList />} />
         <Route path="/product" element={<Product />} />
         <Route path="/my-products" element={<MyProduct />} />
         <Route path="/cart" element={<CartPage cartItems={cartItems} setCartItems={setCartItems} />} />

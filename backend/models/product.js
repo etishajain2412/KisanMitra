@@ -14,6 +14,7 @@ const reviewSchema = new mongoose.Schema({
 const bidSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   bidAmount: { type: Number, required: true, min: 0 },
+  quantity: { type: Number, required: true, min: 1 },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -29,10 +30,9 @@ const productSchema = new mongoose.Schema({
   reviews: [reviewSchema],
   stock: { type: Number, required: true, default: 1 },
   isAvailable: { type: Boolean, default: true },
-  isBiddingEnabled: { type: Boolean, default: false }, // New field to control bidding
+  isBiddingEnabled: { type: Boolean, default: false },
   bids: [bidSchema],
-  highestBid: { type: Number, default: 0 },
-  highestBidder: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  minimumBidAmount: { type: Number, default: 0 }, // ✅ Maintain only minimum bid amount
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -42,69 +42,23 @@ productSchema.pre("save", function (next) {
   next();
 });
 
-// Method to update highest bid and highest bidder
-productSchema.methods.updateHighestBid = function () {
-  if (this.bids.length > 0) {
-    const highestBid = this.bids.reduce((max, bid) =>
-      bid.bidAmount > max.bidAmount ? bid : max, this.bids[0]
-    );
-    this.highestBid = highestBid.bidAmount;
-    this.highestBidder = highestBid.userId;
-  } else {
-    this.highestBid = 0;
-    this.highestBidder = null;
-  }
-};
-
-// Method to place a new bid
-productSchema.methods.placeBid = async function (userId, bidAmount) {
+// Method to place a bid
+productSchema.methods.placeBid = async function (userId, bidAmount, quantity) {
   if (!this.isBiddingEnabled) {
     throw new Error("Bidding is not enabled for this product.");
   }
-  if (bidAmount <= this.highestBid) {
-    throw new Error("Bid must be higher than the current highest bid.");
+  if (bidAmount < this.minimumBidAmount) {
+    throw new Error("Bid amount must be at least the minimum bid amount.");
   }
 
-  this.bids.push({ userId, bidAmount });
-  this.updateHighestBid();
+  this.bids.push({ userId, bidAmount, quantity });
   await this.save();
 };
 
-// Method to enable or disable bidding (for sellers)
+// Method to enable or disable bidding
 productSchema.methods.setBidding = async function (isEnabled) {
   this.isBiddingEnabled = isEnabled;
   await this.save();
-};
-
-// Method to sell products to the highest bidders
-productSchema.methods.sellToHighestBidders = async function (stockToSell) {
-  if (!this.isBiddingEnabled) {
-    throw new Error("Bidding must be enabled to sell to highest bidders.");
-  }
-
-  let remainingStock = stockToSell;
-  const sortedBids = this.bids.sort((a, b) => b.bidAmount - a.bidAmount); // Sort bids by amount, descending
-
-  const saleResults = [];
-
-  for (let i = 0; i < sortedBids.length && remainingStock > 0; i++) {
-    const bid = sortedBids[i];
-    const quantityToSell = Math.min(1, remainingStock); // Selling 1 product per bidder
-    saleResults.push({
-      userId: bid.userId,
-      bidAmount: bid.bidAmount,
-      quantity: quantityToSell,
-    });
-
-    remainingStock -= quantityToSell;
-  }
-
-  // Update stock and highest bid
-  this.stock = remainingStock;
-  this.updateHighestBid(); // Ensure highest bid and bidder are updated after selling
-  await this.save();
-
-  return saleResults; // Return who got what quantity at what price
 };
 
 module.exports = mongoose.model("Product", productSchema);
