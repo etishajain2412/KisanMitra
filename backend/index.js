@@ -6,9 +6,9 @@ const socketIo = require("socket.io");
 const axios = require("axios");
 const i18n = require("i18n");
 const connectDB = require("./config/db");
-
+const cookieParser = require('cookie-parser'); // Import cookie-parser
 dotenv.config(); // Load environment variables
-
+require("./config/passport"); // Passport configuration
 // Initialize Express and Server
 const app = express();
 const server = http.createServer(app);
@@ -18,7 +18,7 @@ const io = socketIo(server, {
     credentials: true,
   },
 });
-
+app.use(cookieParser()); // Use cookie-parser middleware
 // ✅ Store io instance in `global` so it can be used anywhere
 global.io = io;
 

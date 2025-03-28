@@ -6,7 +6,7 @@ const router = express.Router();
 
 module.exports = (io) => {
   // GET /api/news - Fetch news from GNews API
-  router.get("/", verifyToken,async (req, res) => {
+  router.get("/",async (req, res) => {
     try {
       const topics = ["agriculture", "farming", "farmer policies"];
 
@@ -16,7 +16,7 @@ module.exports = (io) => {
           .get("https://gnews.io/api/v4/search", {
             params: {
               q: topic,
-              lang: "en",
+              lang: "hi or en",
               country: "in",
               max: 5, // Fetch 5 articles per topic
               token: process.env.GNEWS_API_KEY,

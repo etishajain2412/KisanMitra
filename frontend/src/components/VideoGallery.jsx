@@ -14,6 +14,7 @@ const VideoGallery = () => {
     const[user,setUser]=useState(null);
     useEffect(() => {
         const fetchVideos = async () => {
+            console.log("here")
             try {
                 axios.get(`${backendUrl}/api/videos`)
                     .then(response => {
@@ -21,18 +22,20 @@ const VideoGallery = () => {
                         const farmerRes = response.data.filter(video => video.category !== "Expert");
                         setExpertVideos(expertRes);
                         setFarmerVideos(farmerRes);
+                        console.log("videos fetched")
                     })
             } catch (error) {
                 console.error("Error fetching videos:", error);
             }
         }
         const user = JSON.parse(localStorage.getItem("user"));
+       
+        console.log(`user: ${user}`)
         
         if (user) {
-            setUserRole(user.role);
-            console.log(user)
+            // setUserRole(user.role);
             setUser(user)
-            if (user.role === "farmer") fetchEarnings(); // ✅ Set user role for conditional earnings display
+            // if (user.role === "farmer") fetchEarnings(); // ✅ Set user role for conditional earnings display
         }
 
         fetchVideos();
@@ -216,7 +219,8 @@ const VideoGallery = () => {
                                 </Box>
 
                               
-{(user.role === "admin" || user.Id === video.uploadedBy) && (
+{/* {( user.userId === video.uploadedBy) &&  */}
+{(
     <button onClick={() => handleDeleteVideo(video._id)} style={{ backgroundColor: "red", color: "white", padding: "5px 10px", borderRadius: "5px" }}>
         🗑 Delete Video
     </button>

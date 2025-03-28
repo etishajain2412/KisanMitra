@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from "react-i18next";
+import { useNavigate, useLocation } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 function Login() {
-  const { t } = useTranslation();
   const [formData, setFormData] = useState({
-    identifier: '',  // handles email or username
+    identifier: '', // Handles either email or username
     password: ''
   });
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const navigate = useNavigate();
+  const location = useLocation(); // To get query parameters from URL
+
+  // Extract error from URL if redirected after Google login failure
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const error = params.get('error');
+    if (error) {
+      setErrorMessage(error);
+    }
+  }, [location]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -25,14 +36,21 @@ function Login() {
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', formData, {
         headers: { 'Content-Type': 'application/json' },
+        withCredentials: true, // ✅ Important for sending/receiving cookies
       });
+
       console.log(res.data);
-      localStorage.setItem('token', res.data.token); // Save token
-      navigate('/'); // Redirect after login
+      navigate('/'); // Redirect to dashboard after successful login
     } catch (error) {
       console.error('Login failed:', error.response);
-      alert(t("login_failed") + ": " + error.response.data.message);
+      setErrorMessage(error.response?.data?.message || 'Login failed');
     }
+  };
+
+  // Handle Google Login
+  const handleGoogleLogin = () => {
+    Cookies.set("authState", "login", { expires: 1 });
+    window.location.href = "http://localhost:5000/api/auth/google";
   };
 
   return (
@@ -40,50 +58,68 @@ function Login() {
       <div className="card shadow-lg p-4 border-0" style={{ width: "22rem", borderRadius: "10px" }}>
         <div className="card-body">
           {/* Title */}
-          <h2 className="fw-bold text-center text-dark mb-3">{t("login_title")}</h2>
-          <p className="text-muted text-center">{t("login_subtitle")}</p>
-  
+          <h2 className="fw-bold text-center text-dark mb-3">Login</h2>
+          <p className="text-muted text-center">Enter your details to sign in</p>
+
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="alert alert-danger text-center" role="alert">
+              {errorMessage}
+            </div>
+          )}
+
           {/* Login Form */}
           <form onSubmit={handleSubmit}>
             {/* Email/Username */}
             <div className="mb-3">
-              <label className="form-label fw-semibold">{t("email_or_username")}</label>
+              <label className="form-label fw-semibold">Email or Username</label>
               <input
                 type="text"
                 name="identifier"
-                placeholder={t("enter_email_or_username")}
+                placeholder="Enter your email or username"
                 value={formData.identifier}
                 onChange={handleChange}
                 className="form-control"
                 required
               />
             </div>
-  
+
             {/* Password */}
             <div className="mb-3">
-              <label className="form-label fw-semibold">{t("password")}</label>
+              <label className="form-label fw-semibold">Password</label>
               <input
                 type="password"
                 name="password"
-                placeholder={t("enter_password")}
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
                 className="form-control"
                 required
               />
             </div>
-  
+
             {/* Login Button */}
             <button type="submit" className="btn btn-primary btn-lg w-100">
-              {t("login_button")}
+              Login
             </button>
           </form>
-  
+
+          <div className="text-center my-3">OR</div>
+
+          {/* Google Login Button */}
+          <div className="d-flex justify-content-center">
+            <button
+              onClick={handleGoogleLogin}
+              className="btn btn-outline-primary w-100"
+              style={{ backgroundColor: "#4285F4", color: "white" }}
+            >
+              <i className="bi bi-google me-2"></i> Sign in with Google
+            </button>
+          </div>
+
           {/* Register Link */}
           <p className="text-center mt-3">
-            <small>
-              {t("dont_have_account")} <a href="/register" className="text-primary">{t("sign_up")}</a>
-            </small>
+            <small>Don't have an account? <a href="/register" className="text-primary">Sign up</a></small>
           </p>
         </div>
       </div>

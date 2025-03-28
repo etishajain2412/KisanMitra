@@ -249,6 +249,7 @@ router.put("/update/:id", upload.array("images", 5), async (req, res) => {
     res.status(500).json({ message: "Error updating product" });
   }
 });
+
 /* =============================================================
    ✅ ENABLE/DISABLE BIDDING
 ================================================================ */

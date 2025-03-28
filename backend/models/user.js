@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    // required: true,
     trim: true
   },
   username: {
     type: String,
-    required: true,
+    // required: true,
     unique: true,
     trim: true
   },
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    // required: true,
     minlength: 6
   },
    // ✅ Add role field with default as "farmer"
