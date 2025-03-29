@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -12,23 +13,19 @@ function Dashboard() {
 
   // Check if the user is logged in
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-    } else {
-      fetchUserProfile(token);
-    }
-  }, [navigate]);
+    fetchUserProfile();
+  }, []);
 
-  // Fetch user profile details
-  const fetchUserProfile = async (token) => {
+  // Fetch user profile details (Uses cookies)
+  const fetchUserProfile = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/users/me', {
-        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true, // Sends the auth token from cookies
       });
       setProfilePic(res.data.profileImage);
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      navigate('/login'); // Redirect if unauthorized
     }
   };
 
@@ -49,18 +46,13 @@ function Dashboard() {
     const formData = new FormData();
     formData.append('profileImage', image);
 
-    const token = localStorage.getItem('token');
-    if (!token) return alert('User not authenticated');
-
     try {
       const res = await axios.post(
         'http://localhost:5000/api/users/upload-profile',
         formData,
         {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { 'Content-Type': 'multipart/form-data' },
+          withCredentials: true, // Send cookies
         }
       );
 
@@ -68,7 +60,7 @@ function Dashboard() {
       setPreview('');
       setProfilePic(res.data.imageUrl);
     } catch (error) {
-      setMessage('Upload failed: ' + error.response?.data?.message || 'An error occurred');
+      setMessage('Upload failed: ' + (error.response?.data?.message || 'An error occurred'));
       console.error('Error:', error);
     } finally {
       setIsUploading(false);
@@ -77,28 +69,30 @@ function Dashboard() {
 
   // Remove Profile Picture
   const handleRemovePicture = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return alert('User not authenticated');
-
     try {
       await axios.delete('http://localhost:5000/api/users/remove-profile', {
-        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
       });
 
       setProfilePic('');
       setMessage('Profile picture removed successfully');
     } catch (error) {
       console.error('Error removing profile picture:', error);
-      setMessage('Failed to remove profile picture: ' + error.response?.data?.message || 'An error occurred');
+      setMessage('Failed to remove profile picture: ' + (error.response?.data?.message || 'An error occurred'));
     }
   };
 
-  // Logout handler
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+  // Logout handler (Clears Cookie)
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+      Cookies.remove('token'); // Remove token from cookies
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
-
+  
   return (
     <div className='flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6'>
       <div className='w-full max-w-md p-8 bg-white shadow-lg rounded-lg'>
@@ -162,7 +156,7 @@ function Dashboard() {
 
           <div>
             <button
-              onClick={() => navigate('/news')} // Navigate to /news
+              onClick={() => navigate('/news')}
               className='w-full p-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600'
             >
               View News

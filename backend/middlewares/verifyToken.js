@@ -1,44 +1,34 @@
 const jwt = require('jsonwebtoken');
 const User = require("../models/User");
 
-const verifyToken = (req, res, next) => {
-  // Get the Authorization header
-  const authHeader = req.header('Authorization');
-
-  // Check if the header exists
-  if (!authHeader) {
-    return res.status(401).json({ message: 'Access Denied: No token provided' });
-  }
-
-  // Check if the header is in the correct format: "Bearer <token>"
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0] !== 'Bearer') {
-    return res.status(401).json({ message: 'Access Denied: Invalid token format' });
-  }
-
-  // Extract the token
-  const token = parts[1];
-
-  // Verify the token
+const verifyToken = async (req, res, next) => {
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET); // Decode token
-    console.log("Decoded User:", verified); // Debugging (remove in production)
+    // 1️⃣ Check token in cookies first
+    let token = req.cookies?.token || req.header('Authorization')?.split(' ')[1];
 
-    // Attach the user ID to the request object
-    req.user = { id: verified.id }; // Ensure the payload contains `id`
+    // 2️⃣ If no token found, deny access
+    if (!token) {
+      return res.status(401).json({ message: 'Access Denied: No token provided' });
+    }
 
-    //  // ✅ Fetch user role from DB
-    //  const user = await User.findById(req.user.userId);
-    //  if (!user) {
-    //      return res.status(404).json({ message: "User not found" });
-    //  }
+    // 3️⃣ Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded User:", decoded); // Debugging (remove in production)
 
-    //  req.user.role = user.role; // ✅ Attach user role
+    // 4️⃣ Attach user ID to request
+    req.user = { id: decoded.id };
+
+    // 5️⃣ (Optional) Fetch user role from DB if needed
+    // const user = await User.findById(decoded.id);
+    // if (!user) {
+    //   return res.status(404).json({ message: "User not found" });
+    // }
+    // req.user.role = user.role;
 
     next(); // Proceed to the next middleware/route
   } catch (error) {
-    console.error('Token verification error:', error.message); // Debugging
-    res.status(400).json({ message: 'Invalid Token' });
+    console.error('Token verification error:', error.message);
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 

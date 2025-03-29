@@ -1,34 +1,51 @@
 import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
 import Cookies from "js-cookie";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  
   const [formData, setFormData] = useState({
     name: "",
     username: "",
     email: "",
-    password: "",
-    roles: "user",
+    password: ""
   });
-  const [error, setError] = useState("");
+
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
+    if (Cookies.get("token")) {
+      navigate("/profile");
+    }
     const params = new URLSearchParams(location.search);
     const errorMessage = params.get("error");
     if (errorMessage) {
       setError(errorMessage);
     }
-  }, [location]);
+  }, [location, navigate]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const validateForm = () => {
+    if (!formData.name || !formData.username || !formData.email || !formData.password) {
+      return "All fields are required.";
+    }
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      return "Enter a valid email address.";
+    }
+    if (formData.password.length < 6) {
+      return "Password must be at least 6 characters.";
+    }
+    return null;
   };
 
   const handleSubmit = async (e) => {
@@ -37,8 +54,9 @@ const Register = () => {
     setError("");
     setSuccessMessage("");
 
-    if (!formData.username || !formData.name || !formData.email || !formData.password) {
-      setError("All fields are required");
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       setLoading(false);
       return;
     }
@@ -46,10 +64,9 @@ const Register = () => {
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/register",
-        { ...formData, roles: [formData.roles] },
+        formData,
         { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );
-
       setSuccessMessage(response.data.message || "Registration successful! Redirecting...");
       setTimeout(() => navigate("/profile"), 2000);
     } catch (err) {
@@ -59,59 +76,45 @@ const Register = () => {
     }
   };
 
-  const handleGoogleAuth = (isRegister) => {
-    Cookies.set("authState", isRegister ? "register" : "login", { expires: 1 });
+  const handleGoogleAuth = () => {
+    Cookies.set("authState", "register", { expires: 1, sameSite: "Strict" });
     window.location.href = "http://localhost:5000/api/auth/google";
   };
 
   return (
-    <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
-      <div className="card shadow-lg p-4 border-0" style={{ width: "24rem", borderRadius: "10px" }}>
-        <div className="card-body">
-          <h2 className="fw-bold text-center text-dark mb-3">Create an Account</h2>
-          <p className="text-muted text-center">Join us today and explore the platform!</p>
-
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Full Name</label>
-              <input type="text" name="name" placeholder="Enter your full name" value={formData.name} onChange={handleChange} className="form-control" required />
-            </div>
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Username</label>
-              <input type="text" name="username" placeholder="Choose a username" value={formData.username} onChange={handleChange} className="form-control" required />
-            </div>
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Email</label>
-              <input type="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} className="form-control" required />
-            </div>
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Password</label>
-              <input type="password" name="password" placeholder="Create a password" value={formData.password} onChange={handleChange} className="form-control" required />
-            </div>
-            <button type="submit" className="btn btn-primary btn-lg w-100" disabled={loading}>
-              {loading ? "Registering..." : "Register"}
-            </button>
-          </form>
-
-          {error && <p className="text-center mt-3 text-danger fw-bold">{error}</p>}
-          {successMessage && <p className="text-center mt-3 text-success fw-bold">{successMessage}</p>}
-
-          <div className="text-center my-3">OR</div>
-
-          <div className="d-flex justify-content-center">
-            <button
-              onClick={() => handleGoogleAuth(true)}
-              className="btn btn-outline-primary w-100"
-              style={{ backgroundColor: "#4285F4", color: "white" }}
-            >
-              Register with Google
-            </button>
-          </div>
-
-          <p className="text-center mt-3">
-            <small>Already have an account? <a href="/login" className="text-primary">Sign in</a></small>
-          </p>
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left Side - Branding */}
+      <div className="hidden md:flex md:w-1/2 p-8 flex-col justify-center items-center bg-gradient-to-br from-green-500 to-green-700 text-white">
+        <div className="max-w-md text-center">
+          <div className="text-4xl font-bold mb-2 text-white">KisanMitra</div>
+          <h1 className="text-4xl font-bold mb-6">Join Our Community</h1>
+          <p className="text-xl mb-8">Empowering farmers with technology.</p>
         </div>
+      </div>
+      
+      {/* Right Side - Registration Form */}
+      <div className="w-full md:w-1/2 flex justify-center items-center p-4 md:p-8">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">Register</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {error && <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">{error}</div>}
+            {successMessage && <div className="bg-green-100 text-green-700 px-4 py-2 rounded mb-4">{successMessage}</div>}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} className="w-full p-2 border rounded" required />
+              <input type="text" name="username" placeholder="Username" value={formData.username} onChange={handleChange} className="w-full p-2 border rounded" required />
+              <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="w-full p-2 border rounded" required />
+              <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} className="w-full p-2 border rounded" required />
+              <Button type="submit" className="w-full" disabled={loading}>{loading ? "Registering..." : "Register"}</Button>
+            </form>
+            <div className="text-center my-3">OR</div>
+            <Button onClick={handleGoogleAuth} className="w-full bg-blue-600 text-white">Register with Google</Button>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-center text-gray-600">Already have an account? <Link to="/login" className="text-green-600 hover:text-green-800 font-semibold">Login</Link></p>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );

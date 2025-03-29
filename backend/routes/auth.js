@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User.js');
 const passport = require("passport");
+
 const router = express.Router();
 
 // Register Route
@@ -10,7 +11,6 @@ router.post('/register', async (req, res) => {
   try {
     const { name, username, email, password } = req.body;
 
-    // Input validation
     if (!name || !username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
@@ -38,9 +38,9 @@ router.post('/register', async (req, res) => {
 
     // Set token in an HTTP-only cookie
     res.cookie('token', token, {
-      httpOnly: true, // Prevents JavaScript access
-      secure: process.env.NODE_ENV === 'production', // Secure only in production
-      sameSite: 'strict', // Helps prevent CSRF attacks
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days expiration
     });
 
@@ -90,57 +90,52 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+// 🔹 Google Authentication (Login/Register)
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 // 🔹 Google Authentication Callback
 router.get("/google/callback", (req, res, next) => {
-    // Determine the failure redirect URL based on the authState cookie
     const failureRedirect = req.cookies.authState === "login"
         ? "http://localhost:3000/login?error=Please register first."
         : "http://localhost:3000/register?error=Please login first.";
 
-    // Passport authentication middleware
     passport.authenticate("google", { session: false, failureRedirect })(req, res, next);
 }, async (req, res) => {
     try {
         const user = req.user;
 
         if (!user) {
-            // Redirect to login page with an error message when no user is found
             return res.redirect("http://localhost:3000/login?error=User not found. Please register first.");
         }
 
         // Generate JWT token for the user
         const token = jwt.sign(
-            { userId: user._id, email: user.email, username: user.username },
+            { id: user._id, email: user.email, username: user.username },
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
 
-        // Set the token in a cookie
-        res.cookie("authToken", token, {
+        // Set the token in an HTTP-only cookie (consistent with normal login)
+        res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-      
-
-        // Redirect to the profile page on successful login
+        // Redirect to profile page on successful login
         res.redirect("http://localhost:3000/profile");
     } catch (error) {
         console.error("Error during Google authentication:", error);
-        // Redirect to login page with a server error message in case of exceptions
         res.redirect("http://localhost:3000/login?error=Server error during Google authentication. Please try again later.");
     }
 });
-// Logout Route
-router.post('/logout', (req, res) => {
-  req.logout(() => {  // Only works if Passport sessions are enabled
-    res.clearCookie('token');
-    res.status(200).json({ message: 'Logged out successfully' });
-  });
-});
 
+// Logout Route (Clears JWT Cookie)
+router.post('/logout', (req, res) => {
+  res.clearCookie('token'); // Clears both normal & Google login tokens since we use 'token' for both
+  res.status(200).json({ message: 'Logged out successfully' });
+});
 
 module.exports = router;

@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-
+import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   server: {
     port: 3000,
@@ -9,12 +9,9 @@ export default defineConfig({
       overlay: true, // Enables hot reload errors in the browser
     },
   },
-  plugins: [react()],
+  plugins: [react(),tailwindcss()],
   resolve: {
     extensions: [".js", ".jsx"], // Ensures JSX is recognized
-  },
-  css: {
-    postcss: "./postcss.config.js", // Ensures Tailwind is correctly loaded
   },
 });
 
