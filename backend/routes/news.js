@@ -1,32 +1,35 @@
 const express = require("express");
 const axios = require("axios");
 require("dotenv").config(); // Load environment variables
-const verifyToken=require('../middlewares/verifyToken')
+const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
 
 module.exports = (io) => {
   // GET /api/news - Fetch news from GNews API
-  router.get("/",async (req, res) => {
+  router.get("/", async (req, res) => {
     try {
-      const topics = ["agriculture", "farming", "farmer policies"];
+    const topics = ["agriculture", "farming", "farmer policies" ,"farmer"];
+      const languages = ["hi", "en"]; // Separate requests for Hindi & English
 
-      // Fetch all topics in parallel
-      const newsRequests = topics.map((topic) =>
-        axios
-          .get("https://gnews.io/api/v4/search", {
-            params: {
-              q: topic,
-              lang: "hi or en",
-              country: "in",
-              max: 5, // Fetch 5 articles per topic
-              token: process.env.GNEWS_API_KEY,
-            },
-          })
-          .then((response) => response.data.articles)
-          .catch((error) => {
-            console.error(`Error fetching news for topic ${topic}:`, error.message);
-            return [];
-          })
+      // Fetch news for each topic in both languages
+      const newsRequests = topics.flatMap((topic) =>
+        languages.map((lang) =>
+          axios
+            .get("https://gnews.io/api/v4/search", {
+              params: {
+                q: topic,
+                lang, // Single language per request
+                country: "in",
+                max: 5, // Fetch 5 articles per topic per language
+                token: process.env.GNEWS_API_KEY,
+              },
+            })
+            .then((response) => response.data.articles)
+            .catch((error) => {
+             
+              return [];
+            })
+        )
       );
 
       // Wait for all API calls to complete
