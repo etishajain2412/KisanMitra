@@ -6,7 +6,7 @@ const verifyToken = require("../middlewares/verifyToken");
 
 router.post("/add",verifyToken, addStory);
 router.get("/all", getStories);
-router.post("/like/:storyId", likeStory);
+router.post("/like/:storyId",verifyToken, likeStory);
 router.post("/comment/:storyId", addComment);
 
 module.exports = router;

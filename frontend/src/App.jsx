@@ -58,7 +58,7 @@ import {useState} from 'react';
 
         <Route path="/forums"  element={<Forum />} />
         <Route path="/videos" element={<VideoGallery />} />
-             <Route path="/videos/upload" element={<UploadVideo />} />                 <Route path='/news' element={<News/>}/>
+        <Route path="/videos/upload" element={<UploadVideo />} />                 <Route path='/news' element={<News/>}/>
       </Routes>
     </Router>
    )

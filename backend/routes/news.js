@@ -8,7 +8,7 @@ module.exports = (io) => {
   // GET /api/news - Fetch news from GNews API
   router.get("/", async (req, res) => {
     try {
-    const topics = ["agriculture", "farming", "farmer policies" ,"farmer"];
+      const topics = ["agriculture", "farming", "farmer policies", "farmer"];
       const languages = ["hi", "en"]; // Separate requests for Hindi & English
 
       // Fetch news for each topic in both languages
@@ -26,7 +26,7 @@ module.exports = (io) => {
             })
             .then((response) => response.data.articles)
             .catch((error) => {
-             
+
               return [];
             })
         )

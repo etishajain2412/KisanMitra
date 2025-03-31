@@ -5,6 +5,8 @@ import io from "socket.io-client";
 import { FaHeart, FaRegHeart, FaCommentDots } from "react-icons/fa";
 import { Container, Row, Col, Card, Button, Form } from "react-bootstrap"; // Bootstrap components
 import { useTranslation } from "react-i18next";
+axios.defaults.withCredentials=true
+
 
 const socket = io("http://localhost:5000"); // ✅ Connect to backend socket
 
@@ -15,8 +17,9 @@ const SuccessStories = () => {
     const [stories, setStories] = useState([]);
     const [commentText, setCommentText] = useState({});
     const [showComments, setShowComments] = useState({});
-    const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.userId || null;
+    const [user, setUser] = useState(null);
+const [userId, setUserId] = useState(null);
+  
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -49,6 +52,24 @@ const SuccessStories = () => {
         };
     }, []);
 
+
+useEffect(() => {
+    const fetchUser = async () => {
+        try {
+            const response = await axios.get(`${backendUrl}/api/users/me`, {
+                withCredentials: true, // Important to send cookies
+            });
+            setUser(response.data.user);
+            setUserId(response.data.user?.id); // Assuming backend returns user object
+        } catch (error) {
+            console.error("Error fetching user:", error);
+        }
+    };
+
+    fetchUser();
+}, []);
+
+
     const fetchStories = async () => {
         try {
             const response = await axios.get(`${backendUrl}/api/success-stories/all`);
@@ -63,13 +84,13 @@ const SuccessStories = () => {
     };
 
     const toggleLike = useCallback(async (storyId) => {
-        if (!userId) {
-            alert(t("successStories.loginToLike"));
-            return;
-        }
+        // if (!userId) {
+        //     alert(t("successStories.loginToLike"));
+        //     return;
+        // }
 
         try {
-            const response = await axios.post(`${backendUrl}/api/success-stories/like/${storyId}`, { userId });
+            const response = await axios.post(`${backendUrl}/api/success-stories/like/${storyId}`);
             if (response.data.success) {
                 setStories((prevStories) =>
                     prevStories.map((story) =>
@@ -91,7 +112,7 @@ const SuccessStories = () => {
 
         try {
             const commentData = {
-                userId: user.userId,
+                userId: userId,
                 userName: user.name,
                 text: text,
             };
@@ -99,20 +120,35 @@ const SuccessStories = () => {
             const response = await axios.post(`${backendUrl}/api/success-stories/comment/${storyId}`, commentData);
             if (response.data.success) {
                 const newComment = response.data.comment;
+                console.log(newComment)
                 socket.emit("commentStory", { storyId: storyId, comment: newComment });
-                setCommentText("");
+                // 🔹 Update the state immediately
+            setStories((prevStories) =>
+                prevStories.map((story) =>
+                    story._id === storyId
+                        ? { ...story, comments: [...story.comments, newComment] }
+                        : story
+                )
+            );
+            
+                // 🔹 Clear only the input for that specific story
+            setCommentText((prev) => ({
+                ...prev,
+                [storyId]: "",
+            }));
             }
         } catch (error) {
             console.error("❌ Error submitting comment:", error);
         }
     };
-
+    
     const handleCommentChange = (storyId, text) => {
         setCommentText((prev) => ({
             ...prev,
             [storyId]: text,
         }));
     };
+    console.log(commentText)
 
     const toggleComments = (storyId) => {
         setShowComments((prevState) => ({
@@ -120,6 +156,7 @@ const SuccessStories = () => {
             [storyId]: !prevState[storyId],
         }));
     };
+    console.log("comments toggling")
 
     return (
         <Container className="mt-4">

@@ -1,7 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
+import { Button } from "../components/ui/button";
+import { Loader2 } from "lucide-react";
+import { cn } from "../lib/utils";
+import NavigationBar from "../components/NavigationBar";
 
 const Product = () => {
+  const [activeView, setActiveView] = useState("addProduct");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -10,50 +15,35 @@ const Product = () => {
     stock: "1",
     isBiddingEnabled: false,
     minimumBidAmount: "",
-    images: [],
+    images: []
   });
 
-  const [previewImages, setPreviewImages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
-  // Handle input changes
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? e.target.checked : value,
     }));
   };
 
-  // Handle file upload preview
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData((prev) => ({ ...prev, images: files }));
-
-    // Preview images
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setPreviewImages(previews);
-  };
-
-  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
 
     const productData = new FormData();
     for (const key in formData) {
       if (key === "images") {
         formData.images.forEach((image) => productData.append("images", image));
       } else {
-        productData.append(key, formData[key]);
+        productData.append(key, formData[key].toString());
       }
     }
 
     try {
-      const token = localStorage.getItem("token"); // Assuming user is logged in
-      const response = await axios.post(
+      const token = localStorage.getItem("token");
+      await axios.post(
         "http://localhost:5000/api/products/addProduct",
         productData,
         {
@@ -63,8 +53,6 @@ const Product = () => {
           },
         }
       );
-
-      setMessage("Product added successfully!");
       setFormData({
         name: "",
         description: "",
@@ -75,147 +63,101 @@ const Product = () => {
         minimumBidAmount: "",
         images: [],
       });
-      setPreviewImages([]);
     } catch (error) {
-      setMessage(error.response?.data?.message || "Error adding product");
+      console.error("Error adding product", error);
     }
-
     setLoading(false);
   };
 
+  const renderActiveView = () => {
+    switch (activeView) {
+      case "addProduct":
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg border border-green-100 shadow-sm overflow-hidden mt-6">
+              <div className="bg-gradient-to-r from-green-100 to-emerald-50 p-6">
+                <h2 className="text-2xl font-bold text-green-800">Add New Product</h2>
+              </div>
+              <form onSubmit={handleSubmit} className="p-6">
+                <div className="mb-8">
+                  <input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter product name"
+                    className="mt-1"
+                  />
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                    placeholder="Describe your product"
+                    className="mt-1 min-h-[100px]"
+                  />
+                  <input
+                    id="price"
+                    name="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    placeholder="Enter price"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    type="submit" 
+                    disabled={loading} 
+                    className={cn(
+                      "bg-green-600 hover:bg-green-700 text-white px-6",
+                      loading && "opacity-70 cursor-not-allowed"
+                    )}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 size={16} className="mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      "Add Product"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      case "viewProducts":
+        return <div className="text-green-800">View Products Component</div>;
+      case "categories":
+        return <div className="text-green-800">Categories Component</div>;
+      case "orders":
+        return <div className="text-green-800">Orders Component</div>;
+      case "analytics":
+        return <div className="text-green-800">Analytics Component</div>;
+      case "shipping":
+        return <div className="text-green-800">Shipping Component</div>;
+      default:
+        return <div className="text-green-800">Coming Soon</div>;
+    }
+  };
+
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
-      <h2 className="text-2xl font-bold text-gray-700 mb-4">Add a New Product</h2>
-
-      {message && <p className="mb-4 text-center text-green-600">{message}</p>}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name */}
-        <div>
-          <label className="block text-gray-600">Product Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded-md focus:ring focus:ring-purple-300"
-          />
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block text-gray-600">Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded-md focus:ring focus:ring-purple-300"
-          ></textarea>
-        </div>
-
-        {/* Price */}
-        <div>
-          <label className="block text-gray-600">Price (₹)</label>
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded-md focus:ring focus:ring-purple-300"
-          />
-        </div>
-
-        {/* Category */}
-        <div>
-          <label className="block text-gray-600">Category</label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-md focus:ring focus:ring-purple-300"
-          >
-            <option value="crop">Crop</option>
-            <option value="fertilizer">Fertilizer</option>
-            <option value="equipment">Equipment</option>
-          </select>
-        </div>
-
-        {/* Stock */}
-        <div>
-          <label className="block text-gray-600">Stock</label>
-          <input
-            type="number"
-            name="stock"
-            value={formData.stock}
-            onChange={handleChange}
-            min="1"
-            className="w-full p-2 border rounded-md focus:ring focus:ring-purple-300"
-          />
-        </div>
-
-        {/* Bidding Option */}
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            name="isBiddingEnabled"
-            checked={formData.isBiddingEnabled}
-            onChange={handleChange}
-            className="w-5 h-5 text-purple-600 focus:ring-purple-500"
-          />
-          <label className="ml-2 text-gray-600">Enable Bidding</label>
-        </div>
-
-        {/* Minimum Bid Amount (Only if Bidding is Enabled) */}
-        {formData.isBiddingEnabled && (
-          <div>
-            <label className="block text-gray-600">Minimum Bid Amount (₹)</label>
-            <input
-              type="number"
-              name="minimumBidAmount"
-              value={formData.minimumBidAmount}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded-md focus:ring focus:ring-purple-300"
-            />
-          </div>
-        )}
-
-        {/* Image Upload */}
-        <div>
-          <label className="block text-gray-600">Upload Images</label>
-          <input
-            type="file"
-            name="images"
-            multiple
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full p-2 border rounded-md focus:ring focus:ring-purple-300"
-          />
-        </div>
-
-        {/* Image Preview */}
-        {previewImages.length > 0 && (
-          <div className="flex space-x-2 mt-2">
-            {previewImages.map((img, index) => (
-              <img key={index} src={img} alt="Preview" className="w-16 h-16 rounded-md object-cover" />
-            ))}
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className={`w-full py-2 text-white rounded-md ${
-            loading ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
-          }`}
-          disabled={loading}
-        >
-          {loading ? "Adding..." : "Add Product"}
-        </button>
-      </form>
+    <div className="min-h-screen w-full bg-gradient-to-b from-green-50 to-white">
+      <div className="container mx-auto px-4 py-8">
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold text-green-800 text-center">KisanMitra Product Haven</h1>
+          <p className="text-green-600 text-center mb-8">Connect farmers and buyers with quality agricultural products</p>
+          <NavigationBar activeView={activeView} setActiveView={setActiveView} />
+        </header>
+        {renderActiveView()}
+      </div>
     </div>
   );
 };

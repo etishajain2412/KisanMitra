@@ -43,7 +43,7 @@ exports.likeStory = async (req, res) => {
     console.log("Received body:", req.body); // ✅ Debugging log
     try {
         console.log("request at like controller:", JSON.stringify(req.body,null,2))
-        const { userId } = req.body;
+        const userId=req.user.id
         console.log("✅ Extracted userId:", userId);
         const { storyId } = req.params;
          // Check if userId is defined
