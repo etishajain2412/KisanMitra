@@ -49,7 +49,7 @@ import {useState} from 'react';
          <Route path="/display" element={<ProductsList />} />
          <Route path="/product" element={<Product />} />
          <Route path="/my-products" element={<MyProduct />} />
-         <Route path="/cart" element={<CartPage cartItems={cartItems} setCartItems={setCartItems} />} />
+         <Route path="/cart" element={<CartPage/>}/>
          <Route path="/payment" element={<PaymentPage />} /> {/* Add PaymentPage route */}
          <Route path="/payment-success" element={<PaymentSuccess  />} /> {/* Add PaymentPage route */}
          <Route path="/payment-failure" element={<PaymentFailure/>} /> {/* Add PaymentPage route */}

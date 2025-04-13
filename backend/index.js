@@ -69,6 +69,9 @@ const forumRoutes = require("./routes/ForumRoutes");
 const videoRoutes = require("./routes/videoRoutes");
 const successRoutes = require("./routes/successRoutes");
 const newsRoutes = require("./routes/news")(io); // ✅ Pass io to news routes
+const orderRoutes = require("./routes/orderRoutes.js");
+const cartRoutes=require("./routes/cartRoutes.js")
+app.use("/api/orders", orderRoutes);
 
 // ✅ Register Routes
 app.use("/api/auth", authRoutes);
@@ -81,7 +84,7 @@ app.use("/api/forum", forumRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/success-stories", successRoutes);
 app.use("/api/news", newsRoutes); // ✅ News route with Socket.io
-
+app.use("/api/cart",cartRoutes) 
 console.log("✅ Routes Registered.");
 app._router.stack.forEach((r) => {
   if (r.route && r.route.path) {
