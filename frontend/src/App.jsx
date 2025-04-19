@@ -23,12 +23,10 @@ import UploadVideo from "./components/UploadVideo";
 import AboutUs from "./pages/AboutUs.jsx";
 import News from "./pages/News.jsx";
 import Features from "./pages/Features.jsx";
+import CheckoutPage from "./pages/CheckoutPage.jsx";
 import {useState} from 'react';
  const App = () => {
-   const [cartItems, setCartItems] = useState([
-     { id: 1, name: "Product A", price: 500, quantity: 2, image: "https://cdn.agdaily.com/wp-content/uploads/2016/09/wheat.jpg" },
-     { id: 2, name: "Product B", price: 300, quantity: 1, image: "https://img.freepik.com/premium-photo/tractor-farmers-field_132358-42627.jpg" },
- ]);
+
 
    return (
      <Router>
@@ -55,7 +53,7 @@ import {useState} from 'react';
          <Route path="/payment-failure" element={<PaymentFailure/>} /> {/* Add PaymentPage route */}
          <Route path="/stories" element={<SuccessStories/>} /> 
         <Route path="/stories/submit" element={<SubmitStory/>} /> 
-
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/forums"  element={<Forum />} />
         <Route path="/videos" element={<VideoGallery />} />
         <Route path="/videos/upload" element={<UploadVideo />} />                 <Route path='/news' element={<News/>}/>

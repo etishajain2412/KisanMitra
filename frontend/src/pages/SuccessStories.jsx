@@ -3,244 +3,233 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { FaHeart, FaRegHeart, FaCommentDots } from "react-icons/fa";
-import { Container, Row, Col, Card, Button, Form } from "react-bootstrap"; // Bootstrap components
 import { useTranslation } from "react-i18next";
-axios.defaults.withCredentials=true
+axios.defaults.withCredentials = true;
 
-
-const socket = io("http://localhost:5000"); // ✅ Connect to backend socket
+const socket = io("http://localhost:5000");
 
 const SuccessStories = () => {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-    const [stories, setStories] = useState([]);
-    const [commentText, setCommentText] = useState({});
-    const [showComments, setShowComments] = useState({});
-    const [user, setUser] = useState(null);
-const [userId, setUserId] = useState(null);
-  
-    const navigate = useNavigate();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const [stories, setStories] = useState([]);
+  const [commentText, setCommentText] = useState({});
+  const [showComments, setShowComments] = useState({});
+  const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-    useEffect(() => {
-        fetchStories();
+  const navigate = useNavigate();
 
-        socket.on("newStory", (newStory) => {
-            setStories((prevStories) => [newStory, ...prevStories]);
-        });
+  useEffect(() => {
+    fetchStories();
 
-        socket.on("storyLiked", ({ storyId, likes }) => {
-            setStories((prevStories) =>
-                prevStories.map((story) =>
-                    story._id === storyId ? { ...story, likes } : story
-                )
-            );
-        });
+    socket.on("newStory", (newStory) => {
+      setStories((prevStories) => [newStory, ...prevStories]);
+    });
 
-        socket.on("storyCommented", ({ storyId, comment }) => {
-            setStories((prevStories) =>
-                prevStories.map((story) =>
-                    story._id === storyId ? { ...story, comments: [...story.comments, comment] } : story
-                )
-            );
-        });
+    socket.on("storyLiked", ({ storyId, likes }) => {
+      setStories((prevStories) =>
+        prevStories.map((story) =>
+          story._id === storyId ? { ...story, likes } : story
+        )
+      );
+    });
 
-        return () => {
-            socket.off("storyLiked");
-            socket.off("storyCommented");
-            socket.off("newStory");
-        };
-    }, []);
+    socket.on("storyCommented", ({ storyId, comment }) => {
+      setStories((prevStories) =>
+        prevStories.map((story) =>
+          story._id === storyId ? { ...story, comments: [...story.comments, comment] } : story
+        )
+      );
+    });
 
+    return () => {
+      socket.off("storyLiked");
+      socket.off("storyCommented");
+      socket.off("newStory");
+    };
+  }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchUser = async () => {
-        try {
-            const response = await axios.get(`${backendUrl}/api/users/me`, {
-                withCredentials: true, // Important to send cookies
-            });
-            setUser(response.data.user);
-            setUserId(response.data.user?.id); // Assuming backend returns user object
-        } catch (error) {
-            console.error("Error fetching user:", error);
-        }
+      try {
+        const response = await axios.get(`${backendUrl}/api/users/me`);
+        setUser(response.data.user);
+        setUserId(response.data.user?.id);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
     };
 
     fetchUser();
-}, []);
+  }, []);
 
+  const fetchStories = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/success-stories/all`);
+      const updatedStories = response.data.map((story) => ({
+        ...story,
+        comments: story.comments || [],
+      }));
+      setStories(updatedStories);
+    } catch (error) {
+      console.error("Error fetching stories:", error);
+    }
+  };
 
-    const fetchStories = async () => {
-        try {
-            const response = await axios.get(`${backendUrl}/api/success-stories/all`);
-            const updatedStories = response.data.map((story) => ({
-                ...story,
-                comments: story.comments || [],
-            }));
-            setStories(updatedStories);
-        } catch (error) {
-            console.error("Error fetching stories:", error);
+  const toggleLike = useCallback(
+    async (storyId) => {
+      try {
+        const response = await axios.post(`${backendUrl}/api/success-stories/like/${storyId}`);
+        if (response.data.success) {
+          setStories((prevStories) =>
+            prevStories.map((story) =>
+              story._id === storyId
+                ? { ...story, likes: response.data.likes, likedBy: response.data.likedBy }
+                : story
+            )
+          );
+          socket.emit("storyLiked", { storyId, likes: response.data.likes, userId });
         }
-    };
+      } catch (error) {
+        console.error("Error liking story:", error);
+      }
+    },
+    [userId, backendUrl]
+  );
 
-    const toggleLike = useCallback(async (storyId) => {
-        // if (!userId) {
-        //     alert(t("successStories.loginToLike"));
-        //     return;
-        // }
+  const handleCommentSubmit = async (storyId) => {
+    const text = commentText[storyId] || "";
+    if (typeof text !== "string" || text.trim() === "") return;
 
-        try {
-            const response = await axios.post(`${backendUrl}/api/success-stories/like/${storyId}`);
-            if (response.data.success) {
-                setStories((prevStories) =>
-                    prevStories.map((story) =>
-                        story._id === storyId
-                            ? { ...story, likes: response.data.likes, likedBy: response.data.likedBy }
-                            : story
-                    )
-                );
-                socket.emit("storyLiked", { storyId, likes: response.data.likes, userId });
-            }
-        } catch (error) {
-            console.error("Error liking story:", error);
-        }
-    }, [userId, backendUrl]);
+    try {
+      const commentData = {
+        userId: userId,
+        userName: user.name,
+        text: text,
+      };
 
-    const handleCommentSubmit = async (storyId) => {
-        const text = commentText[storyId] || "";
-        if (typeof text !== "string" || text.trim() === "") return;
+      const response = await axios.post(`${backendUrl}/api/success-stories/comment/${storyId}`, commentData);
+      if (response.data.success) {
+        const newComment = response.data.comment;
+        socket.emit("commentStory", { storyId: storyId, comment: newComment });
 
-        try {
-            const commentData = {
-                userId: userId,
-                userName: user.name,
-                text: text,
-            };
+        setStories((prevStories) =>
+          prevStories.map((story) =>
+            story._id === storyId
+              ? { ...story, comments: [...story.comments, newComment] }
+              : story
+          )
+        );
 
-            const response = await axios.post(`${backendUrl}/api/success-stories/comment/${storyId}`, commentData);
-            if (response.data.success) {
-                const newComment = response.data.comment;
-                console.log(newComment)
-                socket.emit("commentStory", { storyId: storyId, comment: newComment });
-                // 🔹 Update the state immediately
-            setStories((prevStories) =>
-                prevStories.map((story) =>
-                    story._id === storyId
-                        ? { ...story, comments: [...story.comments, newComment] }
-                        : story
-                )
-            );
-            
-                // 🔹 Clear only the input for that specific story
-            setCommentText((prev) => ({
-                ...prev,
-                [storyId]: "",
-            }));
-            }
-        } catch (error) {
-            console.error("❌ Error submitting comment:", error);
-        }
-    };
-    
-    const handleCommentChange = (storyId, text) => {
         setCommentText((prev) => ({
-            ...prev,
-            [storyId]: text,
+          ...prev,
+          [storyId]: "",
         }));
-    };
-    console.log(commentText)
+      }
+    } catch (error) {
+      console.error("❌ Error submitting comment:", error);
+    }
+  };
 
-    const toggleComments = (storyId) => {
-        setShowComments((prevState) => ({
-            ...prevState,
-            [storyId]: !prevState[storyId],
-        }));
-    };
-    console.log("comments toggling")
+  const handleCommentChange = (storyId, text) => {
+    setCommentText((prev) => ({
+      ...prev,
+      [storyId]: text,
+    }));
+  };
 
-    return (
-        <Container className="mt-4">
-            <h1 className="text-center mb-4">{t("successStories.title")}</h1>
+  const toggleComments = (storyId) => {
+    setShowComments((prevState) => ({
+      ...prevState,
+      [storyId]: !prevState[storyId],
+    }));
+  };
 
-            {/* Share Story Button */}
-            <div className="text-center mb-4">
-                <Button variant="primary" onClick={() => navigate("/stories/submit")}>
-                {t("successStories.shareStoryButton")}
-                </Button>
+  return (
+    <div className="container mx-auto px-4 mt-8">
+      <h1 className="text-center text-3xl font-semibold mb-6">{t("successStories.title")}</h1>
+
+      <div className="text-center mb-6">
+        <button
+          onClick={() => navigate("/stories/submit")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
+        >
+          {t("successStories.shareStoryButton")}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {stories.length === 0 ? (
+          <p className="text-center col-span-full">{t("successStories.noStories")}</p>
+        ) : (
+          stories.map((story) => (
+            <div key={story._id} className="bg-white shadow rounded-lg overflow-hidden flex flex-col h-full">
+              {story.imageUrl && (
+                <img src={story.imageUrl} alt="Story" className="w-full h-64 object-cover" />
+              )}
+              <div className="p-4 flex-grow">
+                <h2 className="text-xl font-semibold">{story.title}</h2>
+                <p className="text-gray-500 mb-2">👤 {story.farmerName}</p>
+                <p>{story.description}</p>
+              </div>
+              <div className="p-4 border-t flex justify-between items-center">
+                <button
+                  onClick={() => toggleLike(story._id)}
+                  className={`flex items-center gap-1 px-3 py-1 rounded ${
+                    Array.isArray(story.likedBy) && story.likedBy.includes(userId)
+                      ? "bg-red-600 text-white"
+                      : "border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                  }`}
+                >
+                  {Array.isArray(story.likedBy) && story.likedBy.includes(userId) ? (
+                    <FaHeart />
+                  ) : (
+                    <FaRegHeart />
+                  )}
+                  {story.likes} {t("successStories.like")}
+                </button>
+
+                <button
+                  onClick={() => toggleComments(story._id)}
+                  className="flex items-center gap-1 border border-gray-400 text-gray-600 hover:bg-gray-100 px-3 py-1 rounded"
+                >
+                  <FaCommentDots />
+                  {showComments[story._id] ? t("successStories.hideComments") : t("successStories.showComments")}
+                </button>
+              </div>
+
+              {showComments[story._id] && (
+                <div className="p-4 border-t bg-gray-50">
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={commentText[story._id] || ""}
+                    onChange={(e) => handleCommentChange(story._id, e.target.value)}
+                    className="w-full p-2 border rounded mb-2"
+                  />
+                  <button
+                    onClick={() => handleCommentSubmit(story._id)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                  >
+                    Comment
+                  </button>
+
+                  <div className="mt-4 space-y-2">
+                    {story.comments.map((comment, index) => (
+                      <div key={index} className="text-sm">
+                        <strong>{comment.userName || "Anonymous"}:</strong> {comment.text}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-
-            {/* Success Stories Grid */}
-            <Row className="g-4">
-                {stories.length === 0 ? (
-                    <Col>
-                        <p className="text-center">{t("successStories.noStories")}</p>
-                    </Col>
-                ) : (
-                    stories.map((story) => (
-                        <Col key={story._id} xs={12} md={6}>
-                            <Card className="shadow-sm h-100">
-                                {story.imageUrl && <Card.Img variant="top" src={story.imageUrl} alt="Story" />}
-                                <Card.Body>
-                                    <Card.Title>{story.title}</Card.Title>
-                                    <Card.Subtitle className="mb-2 text-muted">👤 {story.farmerName}</Card.Subtitle>
-                                    <Card.Text>{story.description}</Card.Text>
-                                </Card.Body>
-                                <Card.Footer className="d-flex justify-content-between">
-                                    {/* Like Button */}
-                                    <Button
-                                        variant={Array.isArray(story.likedBy) && story.likedBy.includes(userId) ? "danger" : "outline-danger"}
-                                        onClick={() => toggleLike(story._id)}
-                                    >
-                                        {Array.isArray(story.isLiked) && story.likedBy.includes(userId) ? (
-                                            <FaHeart className="red-heart" />
-                                        ) : (
-                                            <FaRegHeart />
-                                        )}{" "}
-                                        {story.likes}{t("successStories.like")}
-                                    </Button>
-
-                                    {/* Show/Hide Comments Button */}
-                                    <Button variant="outline-secondary" onClick={() => toggleComments(story._id)}>
-                                        <FaCommentDots /> {showComments[story._id] ? t("successStories.hideComments") : t("successStories.showComments")}
-                                    </Button>
-                                </Card.Footer>
-
-                                {/* Comments Section (Togglable) */}
-                                {showComments[story._id] && (
-                                    <Card.Body>
-                                        <Form>
-                                            <Form.Group>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Write a comment..."
-                                                    value={commentText[story._id] || ""}
-                                                    onChange={(e) => handleCommentChange(story._id, e.target.value)}
-                                                />
-                                            </Form.Group>
-                                            <Button
-                                                variant="success"
-                                                className="mt-2"
-                                                onClick={() => handleCommentSubmit(story._id)}
-                                            >
-                                                Comment
-                                            </Button>
-                                        </Form>
-
-                                        {/* Display Comments */}
-                                        {story.comments.map((comment, index) => (
-                                            <div key={index} className="mt-2">
-                                                <strong>{comment.userName || "Anonymous"}:</strong> {comment.text}
-                                            </div>
-                                        ))}
-                                    </Card.Body>
-                                )}
-                            </Card>
-                        </Col>
-                    ))
-                )}
-            </Row>
-        </Container>
-    );
+          ))
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default SuccessStories;

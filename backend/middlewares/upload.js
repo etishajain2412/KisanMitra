@@ -5,9 +5,6 @@ const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
 
-// ✅ Debugging: Ensure Cloudinary is configured
-console.log("🔵 Cloudinary Configuration:", cloudinary.config());
-
 // ✅ Configure Cloudinary Storage for Videos
 const storage = new CloudinaryStorage({
     cloudinary,

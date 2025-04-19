@@ -1,5 +1,32 @@
 const mongoose = require("mongoose");
 
+const addressSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  phone: {
+    type: String,
+    required: true,
+  },
+  street: {
+    type: String,
+    required: true,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+  pincode: {
+    type: String,
+    required: true,
+  },
+});
+
 const orderSchema = new mongoose.Schema({
   buyerId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -30,7 +57,7 @@ const orderSchema = new mongoose.Schema({
     required: true,
   },
   finalAmount: {
-    type: Number, // can be equal to totalPrice or include other charges if needed
+    type: Number,
     required: true,
   },
   isBidOrder: {
@@ -38,7 +65,7 @@ const orderSchema = new mongoose.Schema({
     default: false,
   },
   shippingAddress: {
-    type: String,
+    type: addressSchema,
     required: true,
   },
   paymentMode: {

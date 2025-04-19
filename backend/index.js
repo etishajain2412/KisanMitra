@@ -79,7 +79,7 @@ app.use("/api/users", profileRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/polygon", polygonRoutes);
 app.use("/api/weather", weatherRoutes);
-app.use("/api/payment", paymentRoutes);
+app.use("/api/payment",paymentRoutes)
 app.use("/api/forum", forumRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/success-stories", successRoutes);
