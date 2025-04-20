@@ -232,6 +232,9 @@ router.get('/seller/orders/:orderId', verifyToken, async (req, res) => {
       .populate('buyerId', 'name email')
       .populate('sellerId', 'name');
 
+    // Log the order to debug and see if populated data is available
+    console.log(order); // Debugging output
+
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
@@ -243,34 +246,29 @@ router.get('/seller/orders/:orderId', verifyToken, async (req, res) => {
     ) {
       return res.status(403).json({ success: false, message: 'Unauthorized access' });
     }
-    
 
     res.json({ success: true, order });
-
   } catch (error) {
     console.error('Error fetching order details:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Update order status
+// Update Order Status
 router.post('/:orderId/status', verifyToken, async (req, res) => {
   try {
     const { status } = req.body;
     const validStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
-    // Manual validation
+    // Validate status
     if (!status) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Status is required' 
-      });
+      return res.status(400).json({ success: false, message: 'Status is required' });
     }
 
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid status. Must be one of: Processing, Shipped, Delivered, Cancelled' 
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status. Must be one of: Processing, Shipped, Delivered, Cancelled',
       });
     }
 
@@ -282,48 +280,25 @@ router.post('/:orderId/status', verifyToken, async (req, res) => {
 
     // Verify the requesting user is the seller
     if (order.sellerId.toString() !== req.user.id) {
-      return res.status(403).json({ 
-        success: false, 
-        message: 'Only the seller can update order status' 
-      });
+      return res.status(403).json({ success: false, message: 'Only the seller can update order status' });
     }
 
     // Prevent updating cancelled or delivered orders
     if (order.orderStatus === 'Cancelled' || order.orderStatus === 'Delivered') {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Cannot update ${order.orderStatus} orders` 
-      });
-    }
-
-    // Special handling for cancellation
-    if (status === 'Cancelled') {
-      // Here you might want to implement:
-      // 1. Refund logic if payment was made
-      // 2. Restore product stock
+      return res.status(400).json({ success: false, message: `Cannot update ${order.orderStatus} orders` });
     }
 
     // Update the order status
     order.orderStatus = status;
-
-    // Save the updated order
     await order.save();
 
-    // Send notification, email update, etc.
-    res.json({ 
-      success: true, 
-      message: 'Order status updated',
-      order 
-    });
-
+    res.json({ success: true, message: 'Order status updated', order });
   } catch (error) {
     console.error('Error updating order status:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error' 
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
 
 
 module.exports = router;
