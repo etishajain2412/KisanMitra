@@ -25,6 +25,10 @@ import News from "./pages/News.jsx";
 import Features from "./pages/Features.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import {useState} from 'react';
+import OrdersPage from "./pages/OrderPage.jsx";
+import OrderDetailPage from "./pages/OrderDetailPage.jsx";
+import SellerDashboard from "./pages/sellerDashBoard.jsx";
+import OrderDetailsPage from "./pages/sellerDetailed.jsx";
  const App = () => {
 
 
@@ -55,8 +59,12 @@ import {useState} from 'react';
         <Route path="/stories/submit" element={<SubmitStory/>} /> 
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/forums"  element={<Forum />} />
+        <Route path="/seller/dashboard" element={<SellerDashboard/>}/>
+        <Route path="/seller/orders/:orderId" element={<OrderDetailsPage/>}/>
         <Route path="/videos" element={<VideoGallery />} />
-        <Route path="/videos/upload" element={<UploadVideo />} />                 <Route path='/news' element={<News/>}/>
+        <Route path="/videos/upload" element={<UploadVideo />} />   
+        <Route path="/orders" element={<OrdersPage/>}/>     
+        <Route path="/orders/:id" element={<OrderDetailPage/>}/>     <Route path='/news' element={<News/>}/>
       </Routes>
     </Router>
    )
