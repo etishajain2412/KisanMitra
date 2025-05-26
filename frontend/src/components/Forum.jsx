@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import io from "socket.io-client";
 import { FaComment, FaPlus, FaReply } from "react-icons/fa";
-import { jwtDecode } from "jwt-decode";
+
 const socket = io("http://localhost:5000"); 
 const Forum = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -13,20 +13,24 @@ const Forum = () => {
      const [loading, setLoading] = useState(true);
      useEffect(() => {
         // Get token from localStorage
-        const token = localStorage.getItem("token");
-        console.log("🔍 Token from localStorage:", token); // ✅ Log the token
-        
-        if (token) {
-          try {
-            const decoded = jwtDecode(token); // Decode the JWT token
-            console.log("🔍 Decoded Token:", decoded); // ✅ Log the decoded token
-            setUserId(decoded.id || decoded.userId);  // Extract userId
-          } catch (error) {
-            console.error("❌ Invalid token:", error);
-          }
-        } else {
-          console.warn("⚠️ No token found in localStorage");
-        }
+        const fetchUser = async () => {
+            try {
+                const response = await axios.get(`${backendUrl}/api/users/me`, {
+                    withCredentials: true,
+                });
+
+                const user = response.data.user;
+                console.log("👤 Logged-in user:", user);
+
+                setUserId(user);
+               
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+
+        fetchUser();
+       
       }, []);
 
       // ✅ Fetch initial forum posts
@@ -66,11 +70,11 @@ const Forum = () => {
       
 
     const handlePostQuestion = () => {
-        console.log("📤 Sending request:", { userId: "12345", userName: "Farmer Kumar", question: newQuestion });
+        console.log("📤 Sending request:", { userId: userId._id, userName: userId.name, question: newQuestion });
         axios.post(`${backendUrl}/api/forum/create`, {
-            userId: userId, // Replace with logged-in user
-            userName: "Farmer Kumar",
-            question: newQuestion
+            userId: userId._id, // Replace with logged-in user
+            userName: userId.name,
+            question: newQuestion,
         }).then(response => {
             setPosts([response.data, ...posts]);
             setNewQuestion("");
@@ -81,13 +85,18 @@ const Forum = () => {
 
     const handleAnswerSubmit = (postId) => {
         axios.post(`${backendUrl}/api/forum/answer/${postId}`, {
-            userId: userId, // Replace with logged-in user
-            userName: "Farmer Kumar",
-            answer: answers[postId] || ""
+            userId: userId._id, 
+            userName: userId.name,
+            answer: answers[postId] || "",
+            withCredentials: true,
         }).then(response => {
             setPosts(posts.map(post => post._id === postId ? response.data : post));
             setAnswers({ ...answers, [postId]: "" });
-            socket.emit("newAnswer", { postId, answer: answerData });
+            socket.emit("newAnswer", { postId, answer: { 
+                userId: userId._id,
+                userName: userId.name,
+                answer: answers[postId] || ""
+            }});
         }).catch(error => console.error("Error submitting answer:", error));
     };
     console.log("🔍 Posts Data:", posts);

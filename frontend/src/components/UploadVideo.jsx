@@ -13,16 +13,32 @@ const UploadVideo = () => {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [category, setCategory] = useState("Tutorial");
+    const [user, setUser]= useState(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!videoFile) return alert("Please upload an MP4 video!");
-        
-         const token = localStorage.getItem("token"); // ✅ Get token
-         if (!token) {
-            console.error("❌ No token found in localStorage!");
+        const fetchUser = async () => {
+            try {
+                const response = await axios.get(`${backendUrl}/api/users/me`, {
+                    withCredentials: true,
+                });
+
+                const user = response.data.user;
+                console.log("👤 Logged-in user:", user);
+
+                setUser(user?.id);
+               
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+
+        fetchUser();
+         if (!user) {
+            console.error("❌ user not found!");
             alert("You need to log in first.");
             return;
         }
@@ -37,8 +53,8 @@ const UploadVideo = () => {
             const response =  await axios.post(`${backendUrl}/api/videos/add`,formData, {
                 headers: { 
         "Content-Type": "multipart/form-data",
-        "Authorization": `Bearer ${localStorage.getItem("token")}` 
     },
+    withCredentials: true,
            
           
             });

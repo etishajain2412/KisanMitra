@@ -28,14 +28,31 @@ const VideoGallery = () => {
                 console.error("Error fetching videos:", error);
             }
         }
-        const user = JSON.parse(localStorage.getItem("user"));
        
-        console.log(`user: ${user}`)
+            const fetchUser = async () => {
+                try {
+                    const response = await axios.get(`${backendUrl}/api/users/me`, {
+                        withCredentials: true,
+                    });
+    
+                    const user = response.data.user;
+                    console.log("👤 Logged-in user:", user);
+    
+                    setUser(user?.id);
+                   
+                } catch (error) {
+                    console.error("Error fetching user:", error);
+                }
+            };
+    
+            fetchUser();
+        
+    
         
         if (user) {
-            // setUserRole(user.role);
+             setUserRole(user.role);
             setUser(user)
-            // if (user.role === "farmer") fetchEarnings(); // ✅ Set user role for conditional earnings display
+             if (user.role === "farmer") fetchEarnings(); // ✅ Set user role for conditional earnings display
         }
 
         fetchVideos();
@@ -54,9 +71,9 @@ const VideoGallery = () => {
     const handleDeleteVideo = async (videoId) => {
         try {
             await axios.delete(
-                `${backendUrl}/api/videos/delete/${videoId}`,
-                { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-            );
+                `${backendUrl}/api/videos/delete/${videoId}`,{
+                withCredentials: true,
+        });
     
             // ✅ Remove video from state after successful deletion
             setFarmerVideos((prevVideos) => prevVideos.filter(video => video._id !== videoId));
@@ -71,7 +88,7 @@ const VideoGallery = () => {
     const fetchEarnings = async () => {
         try {
             const response = await axios.get(`${backendUrl}/api/videos/earnings`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                withCredentials: true,
             });
             setEarnings(response.data.earnings);
         } catch (error) {
@@ -94,8 +111,9 @@ const VideoGallery = () => {
         try {
             const response = await axios.post(
                 `${backendUrl}/api/videos/review/${videoId}`,
-                { reviewText },
-                { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                { reviewText },{
+                withCredentials: true,
+                }
             );
             console.log(response);
             const updatedVideo = response.data; // ✅ Get updated video with populated reviews

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
 import {
     Container,
@@ -15,7 +16,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { CloudUpload as CloudUploadIcon, Preview as PreviewIcon } from "@mui/icons-material";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const SubmitStory = () => {
     const { t } = useTranslation();
 
@@ -25,13 +26,32 @@ const SubmitStory = () => {
     const [imageUrl, setImageUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [preview, setPreview] = useState(false);
+    const [userId, setUserId] = useState(null);
+
     const [farmerName, setFarmerName] = useState(""); // ✅ Store farmer's name
 
 
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem("user")); // ✅ Get current user
-    console.log(user)
-    const userId = user?.userId || null; // ✅ Avoid undefined error
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await axios.get(`${backendUrl}/api/users/me`, {
+                    withCredentials: true,
+                });
+
+                const user = response.data.user;
+                console.log("👤 Logged-in user:", user);
+
+                setUserId(user?.id);
+                setFarmerName(user?.name || ""); // ✅ Set farmerName from backend
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -39,25 +59,20 @@ const SubmitStory = () => {
 
 
         try {
-            const token = localStorage.getItem("token"); // ✅ Ensure user is authenticated
-            if (!token){
-                alert(t("submitStory.errorMessage"));
-                setLoading(false);
-                return;
-            }
+
             const storyData = {
                 title,
                 subHeading,
                 description,
                 imageUrl,
-                farmerName: farmerName ||  t("submitStory.anonymous"), // ✅ Send user input, or default to Anonymous
+                farmerName: farmerName || t("submitStory.anonymous"), // ✅ Send user input, or default to Anonymous
             };
             console.log("📩 Sending Story Data:", storyData);
 
             const response = await axios.post(
                 "http://localhost:5000/api/success-stories/add",
-               storyData,
-                { headers: { Authorization: `Bearer ${token}` } }
+                storyData,
+                { withCredentials: true }
             );
 
             alert(t("submitStory.successMessage"));
@@ -83,7 +98,7 @@ const SubmitStory = () => {
                     <form onSubmit={handleSubmit} className="submit-story-form">
                         {/* Story Title */}
                         <Typography variant="h6" gutterBottom>
-                        {t("submitStory.storyTitle")}
+                            {t("submitStory.storyTitle")}
                         </Typography>
                         <TextField
                             label={t("submitStory.storyTitlePlaceholder")}
@@ -97,21 +112,22 @@ const SubmitStory = () => {
 
                         {/* Farmer's Name Field */}
                         <Typography variant="h6" gutterBottom>
-                        {t("submitStory.yourName")}
+                            {t("submitStory.yourName")}
                         </Typography>
                         <TextField
                             label={t("submitStory.yourNamePlaceholder")}
                             variant="outlined"
                             fullWidth
                             value={farmerName}
-                            onChange={(e) => setFarmerName(e.target.value)}
+                            disabled // ✅ Optional: disable editing if you trust backend
                             sx={{ mb: 2 }}
                         />
 
 
+
                         {/* Sub-Heading */}
                         <Typography variant="h6" gutterBottom>
-                        {t("submitStory.subHeading")}
+                            {t("submitStory.subHeading")}
                         </Typography>
                         <TextField
                             label={t("submitStory.subHeadingPlaceholder")}
@@ -125,7 +141,7 @@ const SubmitStory = () => {
 
                         {/* Main Story */}
                         <Typography variant="h6" gutterBottom>
-                        {t("submitStory.storyJourney")}
+                            {t("submitStory.storyJourney")}
                         </Typography>
                         <TextField
                             label={t("submitStory.storyJourneyPlaceholder")}
@@ -141,7 +157,7 @@ const SubmitStory = () => {
 
                         {/* Image Upload */}
                         <Typography variant="h6" gutterBottom>
-                        {t("submitStory.imageUpload")}
+                            {t("submitStory.imageUpload")}
                         </Typography>
                         <TextField
                             label={t("submitStory.imageUploadPlaceholder")}
@@ -168,7 +184,7 @@ const SubmitStory = () => {
                             onClick={() => setPreview(!preview)}
                             sx={{ mb: 3 }}
                         >
-                           {preview ? t("submitStory.hidePreviewButton") : t("submitStory.previewButton")}
+                            {preview ? t("submitStory.hidePreviewButton") : t("submitStory.previewButton")}
                         </Button>
 
                         {/* Story Preview */}
@@ -183,10 +199,10 @@ const SubmitStory = () => {
                                 }}
                             >
                                 <Typography variant="h5" gutterBottom>
-                                {title || t("submitStory.storyTitlePlaceholder")}
+                                    {title || t("submitStory.storyTitlePlaceholder")}
                                 </Typography>
                                 <Typography variant="subtitle1" gutterBottom color="gray">
-                                    {subHeading ||  t("submitStory.subHeadingPlaceholder")}
+                                    {subHeading || t("submitStory.subHeadingPlaceholder")}
                                 </Typography>
                                 {imageUrl && (
                                     <img
@@ -216,7 +232,7 @@ const SubmitStory = () => {
                             sx={{ py: 1.5, fontSize: "16px" }}
                             disabled={loading}
                         >
-                            {loading ? <CircularProgress size={24} /> :t("submitStory.submitButton")}
+                            {loading ? <CircularProgress size={24} /> : t("submitStory.submitButton")}
                         </Button>
                     </form>
                 </CardContent>

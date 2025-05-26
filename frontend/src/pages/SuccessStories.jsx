@@ -55,6 +55,7 @@ const SuccessStories = () => {
       try {
         const response = await axios.get(`${backendUrl}/api/users/me`);
         setUser(response.data.user);
+        console.log(response.data.user)
         setUserId(response.data.user?.id);
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -114,13 +115,13 @@ const SuccessStories = () => {
         const newComment = response.data.comment;
         socket.emit("commentStory", { storyId: storyId, comment: newComment });
 
-        setStories((prevStories) =>
-          prevStories.map((story) =>
-            story._id === storyId
-              ? { ...story, comments: [...story.comments, newComment] }
-              : story
-          )
-        );
+        // setStories((prevStories) =>
+        //   prevStories.map((story) =>
+        //     story._id === storyId
+        //       ? { ...story, comments: [...story.comments, newComment] }
+        //       : story
+        //   )
+        // );
 
         setCommentText((prev) => ({
           ...prev,
