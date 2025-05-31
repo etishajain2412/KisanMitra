@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import Cookies from "js-cookie";
+axios.defaults.withCredentials=true
 const MyProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -8,11 +9,14 @@ const MyProducts = () => {
   const [editingProductId, setEditingProductId] = useState(null);
   const [editedProduct, setEditedProduct] = useState({});
 
+  const token = Cookies.get("token");
+
   useEffect(() => {
     const fetchMyProducts = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/products/myProducts", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         });
         setProducts(response.data);
       } catch (error) {
@@ -22,14 +26,14 @@ const MyProducts = () => {
     };
 
     fetchMyProducts();
-  }, []);
+  }, [token]);
 
   const handleDelete = async (productId) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
       await axios.delete(`http://localhost:5000/api/products/delete/${productId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter((product) => product._id !== productId));
     } catch (error) {
@@ -43,7 +47,7 @@ const MyProducts = () => {
         `http://localhost:5000/api/products/toggleBidding/${productId}`,
         { isBiddingEnabled, minimumBidAmount },
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -69,36 +73,36 @@ const MyProducts = () => {
       formData.append("description", editedProduct.description);
       formData.append("price", editedProduct.price);
       formData.append("stock", editedProduct.stock);
-      
+
       if (editedProduct.images && editedProduct.images.length > 0) {
         for (let image of editedProduct.images) {
           formData.append("images", image);
         }
       }
-  
+
       const response = await axios.put(
         `http://localhost:5000/api/products/update/${productId}`,
         formData,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         }
       );
-  
+
       setProducts(
         products.map((product) =>
           product._id === productId ? { ...product, ...response.data.product } : product
         )
       );
-  
+
       setEditingProductId(null);
     } catch (error) {
       setError("Error updating product");
     }
   };
-  
+
   if (loading) return <p className="text-center text-gray-500">Loading your products...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
@@ -113,7 +117,11 @@ const MyProducts = () => {
           {products.map((product) => (
             <div key={product._id} className="bg-white shadow-md rounded-lg p-4">
               {product.images.length > 0 ? (
-                <img src={product.images[0]} alt={product.name} className="w-full h-40 object-cover rounded-md" />
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-40 object-cover rounded-md"
+                />
               ) : (
                 <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">
                   No Image
@@ -130,7 +138,9 @@ const MyProducts = () => {
                   />
                   <textarea
                     value={editedProduct.description}
-                    onChange={(e) => setEditedProduct({ ...editedProduct, description: e.target.value })}
+                    onChange={(e) =>
+                      setEditedProduct({ ...editedProduct, description: e.target.value })
+                    }
                     className="w-full p-2 border border-gray-300 rounded mt-2"
                   ></textarea>
                   <input
@@ -145,15 +155,15 @@ const MyProducts = () => {
                     onChange={(e) => setEditedProduct({ ...editedProduct, stock: e.target.value })}
                     className="w-full p-2 border border-gray-300 rounded mt-2"
                   />
-<input
-  type="file"
-  multiple
-  accept="image/*"
-  onChange={(e) =>
-    setEditedProduct({ ...editedProduct, images: Array.from(e.target.files) })
-  }
-  className="w-full p-2 border border-gray-300 rounded mt-2"
-/>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) =>
+                      setEditedProduct({ ...editedProduct, images: Array.from(e.target.files) })
+                    }
+                    className="w-full p-2 border border-gray-300 rounded mt-2"
+                  />
 
                   <button
                     onClick={() => handleUpdate(product._id)}
@@ -180,7 +190,9 @@ const MyProducts = () => {
 
                   {product.isBiddingEnabled ? (
                     <div className="mt-2">
-                      <p className="text-sm text-green-600">Bidding Enabled | Min Bid: ₹{product.minimumBidAmount}</p>
+                      <p className="text-sm text-green-600">
+                        Bidding Enabled | Min Bid: ₹{product.minimumBidAmount}
+                      </p>
                       <button
                         onClick={() => toggleBidding(product._id, false, 0)}
                         className="mt-2 bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded"
@@ -197,13 +209,17 @@ const MyProducts = () => {
                         onChange={(e) =>
                           setProducts(
                             products.map((p) =>
-                              p._id === product._id ? { ...p, tempMinBid: e.target.value } : p
+                              p._id === product._id
+                                ? { ...p, tempMinBid: e.target.value }
+                                : p
                             )
                           )
                         }
                       />
                       <button
-                        onClick={() => toggleBidding(product._id, true, product.tempMinBid || 0)}
+                        onClick={() =>
+                          toggleBidding(product._id, true, product.tempMinBid || 0)
+                        }
                         className="mt-2 bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded"
                       >
                         Enable Bidding

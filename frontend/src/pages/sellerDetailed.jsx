@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import Input from "../components/ui/input";
+import Input from "../components/ui/Input";
 import Label from "../components/ui/Label";
 import { Separator } from "../components/ui/separator";
 import { IndianRupee, Package, Truck, CheckCircle, Clock } from "lucide-react";

@@ -5,11 +5,19 @@ import { Button } from "../ui/button";
 const ProductReviews = ({ 
   reviews, 
   averageRating, 
-  userHasOrdered, 
   onSubmitReview 
 }) => {
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState(0);
+
+  const handleSubmit = () => {
+    const trimmedReview = reviewText.trim();
+    if (rating > 0 && trimmedReview.length > 0) {
+      onSubmitReview(rating, trimmedReview);
+      setRating(0);
+      setReviewText("");
+    }
+  };
 
   return (
     <div className="mt-8 border border-green-200 rounded-lg">
@@ -21,48 +29,54 @@ const ProductReviews = ({
       </div>
       
       <div className="p-4">
-        {userHasOrdered && (
-          <div className="mb-6 p-4 border border-green-100 rounded-lg bg-green-50">
-            <h3 className="text-green-800 font-medium mb-2">Write a Review</h3>
-            
-            <div className="flex mb-3">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  className="focus:outline-none"
-                  aria-label={`Rate ${star} star`}
-                >
-                  <Star 
-                    className={`h-6 w-6 ${
-                      star <= rating 
-                        ? 'text-yellow-500 fill-yellow-500' 
-                        : 'text-gray-300'
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-            
-            <textarea
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
-              placeholder="Share your experience with this product..."
-              className="w-full p-3 border border-green-200 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[100px]"
-              maxLength={500}
-            />
-            <div className="text-xs text-gray-500 text-right">
-              {reviewText.length}/500 characters
-            </div>
-            
-            <Button 
-              onClick={() => onSubmitReview(rating, reviewText)}
-              className="mt-3 bg-green-600 hover:bg-green-700 transition-colors"
-            >
-              Submit Review
-            </Button>
+        {/* Always show the review form */}
+        <div className="mb-6 p-4 border border-green-100 rounded-lg bg-green-50">
+          <h3 className="text-green-800 font-medium mb-2">Write a Review</h3>
+          
+          <div className="flex mb-3">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(star)}
+                className="focus:outline-none"
+                aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+              >
+                <Star 
+                  className={`h-6 w-6 cursor-pointer ${
+                    star <= rating 
+                      ? 'text-yellow-500 fill-yellow-500' 
+                      : 'text-gray-300'
+                  }`}
+                />
+              </button>
+            ))}
           </div>
-        )}
+          
+          <textarea
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+            placeholder="Share your experience with this product..."
+            className="w-full p-3 border border-green-200 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 min-h-[100px]"
+            maxLength={500}
+            aria-describedby="charCount"
+          />
+          <div 
+            id="charCount" 
+            className="text-xs text-gray-500 text-right" 
+            aria-live="polite"
+          >
+            {reviewText.length}/500 characters
+          </div>
+          
+          <Button 
+            onClick={handleSubmit}
+            disabled={rating === 0 || reviewText.trim().length === 0}
+            className="mt-3 bg-green-600 hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Submit Review
+          </Button>
+        </div>
         
         {reviews.length > 0 ? (
           <div className="space-y-4">

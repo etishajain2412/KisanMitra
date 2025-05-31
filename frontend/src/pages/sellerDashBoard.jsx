@@ -33,7 +33,7 @@ import {
   AlertCircle,
   Loader2
 } from "lucide-react";
-import Input from "../components/ui/input";
+import Input from "../components/ui/Input";
 import axios from 'axios';
 import StatusBadge from "../components/ui/StatusBadge";
 import { cn } from "../lib/utils";

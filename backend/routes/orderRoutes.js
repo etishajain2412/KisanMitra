@@ -254,21 +254,22 @@ router.get('/seller/orders/:orderId', verifyToken, async (req, res) => {
   }
 });
 
-// Update Order Status
-router.post('/:orderId/status', verifyToken, async (req, res) => {
+// routes/orderRoutes.js
+
+router.put('/seller/orders/:orderId', verifyToken, async (req, res) => {
   try {
-    const { status } = req.body;
+    const { orderStatus } = req.body;
     const validStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
     // Validate status
-    if (!status) {
-      return res.status(400).json({ success: false, message: 'Status is required' });
+    if (!orderStatus) {
+      return res.status(400).json({ success: false, message: 'orderStatus is required' });
     }
 
-    if (!validStatuses.includes(status)) {
+    if (!validStatuses.includes(orderStatus)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status. Must be one of: Processing, Shipped, Delivered, Cancelled',
+        message: 'Invalid orderStatus. Must be one of: Processing, Shipped, Delivered, Cancelled',
       });
     }
 
@@ -284,21 +285,23 @@ router.post('/:orderId/status', verifyToken, async (req, res) => {
     }
 
     // Prevent updating cancelled or delivered orders
-    if (order.orderStatus === 'Cancelled' || order.orderStatus === 'Delivered') {
-      return res.status(400).json({ success: false, message: `Cannot update ${order.orderStatus} orders` });
+    if (['Cancelled', 'Delivered'].includes(order.orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot update status of ${order.orderStatus} orders`,
+      });
     }
 
     // Update the order status
-    order.orderStatus = status;
+    order.orderStatus = orderStatus;
     await order.save();
 
-    res.json({ success: true, message: 'Order status updated', order });
+    res.json({ success: true, message: 'Order status updated successfully', order });
   } catch (error) {
     console.error('Error updating order status:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
-
 
 
 module.exports = router;

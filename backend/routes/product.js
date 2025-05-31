@@ -5,10 +5,8 @@ const fs = require('fs');
 const verifyToken = require('../middlewares/verifyToken');
 const cloudinary = require('../config/cloudinary');
 const Product = require('../models/product');
-
 const router = express.Router();
 
-// 🔹 Multer temporary storage before Cloudinary upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/'); // Temporary folder
@@ -20,133 +18,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// 🔹 Add Product Route
-router.post('/addProduct', verifyToken, upload.array('images', 5), async (req, res) => {
-  try {
-    const { name, description, price, category, stock, isBiddingEnabled,minimumBidAmount } = req.body;
+const productController = require('../controllers/productController');
 
-    // 🔹 Validate required fields
-    if (!name || !description || !price || !category) {
-      return res.status(400).json({ message: 'All required fields must be provided.' });
-    }
-
-    if (isNaN(price) || price <= 0) {
-      return res.status(400).json({ message: 'Invalid price. Must be a positive number.' });
-    }
-
-    if (stock && isNaN(stock)) {
-      return res.status(400).json({ message: 'Invalid stock value.' });
-    }
-
-    // 🔹 Convert data to proper types
-    const biddingEnabled = isBiddingEnabled === 'true' || isBiddingEnabled === true;
-    const stockValue = stock ? parseInt(stock) : 1;
-    const priceValue = parseFloat(price);
-
-    // 🔹 Handle Image Upload (Optional)
-    let imageUrls = [];
-    if (req.files && req.files.length > 0) {
-      const imageUploadPromises = req.files.map(async (image) => {
-        try {
-          const result = await cloudinary.uploader.upload(image.path, { folder: 'agriculture-products' });
-          fs.unlinkSync(image.path); // Remove file from local storage
-          return result.secure_url;
-        } catch (err) {
-          console.error('Cloudinary Upload Error:', err);
-          return null;
-        }
-      });
-
-      imageUrls = (await Promise.all(imageUploadPromises)).filter(url => url !== null);
-    }
-
-    // 🔹 Save product in DB
-    const newProduct = new Product({
-      name,
-      description,
-      price: priceValue,
-      category,
-      stock: stockValue,
-      sellerId: req.user.id,
-      images: imageUrls,
-      isBiddingEnabled: biddingEnabled,
-      minimumBidAmount
-    });
-
-    await newProduct.save();
-    res.status(201).json({
-      message: 'Product added successfully',
-      product: newProduct,
-    });
-
-  } catch (error) {
-    console.error('Error adding product:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-router.get("/getProducts", async (req, res) => {
-  try {
-    const products = await Product.find()
-      .populate("sellerId", "name email") // Fetch seller info (optional)
-      .select("name description price stock images category isBiddingEnabled minimumBidAmount");
-
-    res.status(200).json(products);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).json({ message: "Error fetching products", error: error.message });
-  }
-});
-router.get("/getProduct/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.json(product);
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-router.post("/placeBid/:productId", verifyToken, async (req, res) => {
-  try {
-    const { bidAmount, quantity } = req.body;
-    const product = await Product.findById(req.params.productId);
-
-    if (!product) return res.status(404).json({ message: "Product not found" });
-
-    if (!product.isBiddingEnabled) {
-      return res.status(400).json({ message: "Bidding is not enabled for this product" });
-    }
-
-    if (bidAmount < product.minimumBidAmount) {
-      return res.status(400).json({ message: `Bid amount must be at least ₹${product.minimumBidAmount}` });
-    }
-
-    // Check if user already placed a bid
-    const existingBidIndex = product.bids.findIndex((bid) => bid.userId.toString() === req.user.id);
-
-    if (existingBidIndex !== -1) {
-      // Update existing bid
-      product.bids[existingBidIndex].bidAmount = bidAmount;
-      product.bids[existingBidIndex].quantity = quantity;
-      product.bids[existingBidIndex].updatedAt = new Date();
-    } else {
-      // Place a new bid
-      product.bids.push({ userId: req.user.id, bidAmount, quantity, createdAt: new Date() });
-    }
-
-    await product.save();
-
-    // Sort bids: user's bid first, then highest to lowest bid
-    product.bids.sort((a, b) => (a.userId.toString() === req.user.id ? -1 : b.bidAmount - a.bidAmount));
-
-    res.status(201).json({ message: "Bid placed/updated successfully", product });
-  } catch (error) {
-    res.status(500).json({ message: "Error placing bid", error: error.message });
-  }
-});
+router.post('/addProduct', verifyToken, upload.array('images', 5), productController.addProduct);
+router.get('/getProducts', productController.getProducts);
+router.get('/getProduct/:id', productController.getProductById);
+router.post('/placeBid/:productId',verifyToken,productController.placeBid);
 
 /* =============================================================
    ✅ GET USER'S PRODUCTS (For My Products page)
@@ -321,21 +198,22 @@ router.put('/updateProduct/:id', async (req, res) => {
 });
 
 // GET /api/products/bids/:productId
-router.get("/bids/:productId", verifyToken, async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.productId)
-      .populate("bids.userId", "name"); // Populate user details
+// router.get("/bids/:productId", verifyToken, async (req, res) => {
+//   try {
+//     const product = await Product.findById(req.params.productId)
+//       .populate("bids.userId", "name"); // Populate user details
 
-    if (!product || !product.bids.length) {
-      return res.status(404).json({ message: "No bids found for this product." });
-    }
+//     if (!product || !product.bids.length) {
+//       return res.status(404).json({ message: "No bids found for this product." });
+//     }
 
-    res.status(200).json(product.bids);
-  } catch (error) {
-    console.error("Error fetching bids:", error);
-    res.status(500).json({ error: "Failed to fetch bids." });
-  }
-});
+//     res.status(200).json(product.bids);
+//   } catch (error) {
+//     console.error("Error fetching bids:", error);
+//     res.status(500).json({ error: "Failed to fetch bids." });
+//   }
+// });
+
 
 // 🔹 Place or update a bid (inside product schema)
 router.post("/bid/:productId", verifyToken, async (req, res) => {

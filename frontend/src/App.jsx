@@ -8,7 +8,7 @@ import React from "react";
  import Contact from "./pages/Contact.jsx";
  import Dashboard from './pages/dashboard';
  import HomePage from "./pages/HomePage"; 
- import Product from './pages/product';
+ import AddProduct from './pages/AddProduct';
 import MyProduct from './pages/MyProduct';
 import ProductsList from './pages/ProductsList.jsx';
 import CartPage from "./pages/CartPage.jsx";
@@ -37,24 +37,26 @@ import OrderDetailsPage from "./pages/sellerDetailed.jsx";
     
      
        <Routes>
-        
-         <Route path="/weather" element={<WeatherPage />} />
-         <Route path="/farming-tips" element={<FarmingTipsPage />} />
+      
          <Route path="/register" element={<Register />} />
+         <Route path='/news' element={<News/>}/>
          <Route path="/" element={<HomePage />} />
          <Route path="/features" element={<Features />} />
          <Route path="/about" element={<AboutUs />} />
          <Route path="/contact" element={<Contact />} />
          <Route path="/login" element={<Login />} />
-         <Route path="/profile" element={<Dashboard />} />
-         <Route path="/product/:id" element={<ProductDetails />} />
-         <Route path="/display" element={<ProductsList />} />
-         <Route path="/product" element={<Product />} />
-         <Route path="/my-products" element={<MyProduct />} />
-         <Route path="/cart" element={<CartPage/>}/>
          <Route path="/payment" element={<PaymentPage />} /> {/* Add PaymentPage route */}
          <Route path="/payment-success" element={<PaymentSuccess  />} /> {/* Add PaymentPage route */}
          <Route path="/payment-failure" element={<PaymentFailure/>} /> {/* Add PaymentPage route */}
+         <Route path="/profile" element={<Dashboard />} />
+         <Route path="/product/:id" element={<ProductDetails />} />
+         <Route path="/weather" element={<WeatherPage />} />
+         <Route path="/farming-tips" element={<FarmingTipsPage />} />
+         <Route path="/display" element={<ProductsList />} />
+         <Route path="/product" element={<AddProduct />} />
+         <Route path="/my-products" element={<MyProduct />} />
+         <Route path="/cart" element={<CartPage/>}/>
+
          <Route path="/stories" element={<SuccessStories/>} /> 
         <Route path="/stories/submit" element={<SubmitStory/>} /> 
         <Route path="/checkout" element={<CheckoutPage />} />
@@ -64,7 +66,8 @@ import OrderDetailsPage from "./pages/sellerDetailed.jsx";
         <Route path="/videos" element={<VideoGallery />} />
         <Route path="/videos/upload" element={<UploadVideo />} />   
         <Route path="/orders" element={<OrdersPage/>}/>     
-        <Route path="/orders/:id" element={<OrderDetailPage/>}/>     <Route path='/news' element={<News/>}/>
+        <Route path="/orders/:id" element={<OrderDetailPage/>}/>     
+
       </Routes>
     </Router>
    )
