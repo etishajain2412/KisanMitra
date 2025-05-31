@@ -76,7 +76,21 @@ const SuccessStories = () => {
       socket.off("storyCommented");
       socket.off("newStory");
     };
-  }, [backendUrl]);
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`${backendUrl}/api/users/me`);
+        setUser(response.data.user);
+        setUserId(response.data.user?.id);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const toggleLike = useCallback(async (storyId) => {
     try {
@@ -110,12 +124,21 @@ const SuccessStories = () => {
       );
       
       if (response.data.success) {
-        socket.emit("commentStory", { 
-          storyId, 
-          comment: response.data.comment 
-        });
-        
-        setCommentText(prev => ({ ...prev, [storyId]: "" }));
+        const newComment = response.data.comment;
+        socket.emit("commentStory", { storyId: storyId, comment: newComment });
+
+        setStories((prevStories) =>
+          prevStories.map((story) =>
+            story._id === storyId
+              ? { ...story, comments: [...story.comments, newComment] }
+              : story
+          )
+        );
+
+        setCommentText((prev) => ({
+          ...prev,
+          [storyId]: "",
+        }));
       }
     } catch (error) {
       console.error("Error submitting comment:", error);

@@ -47,8 +47,9 @@ const Weather = ({ userId }) => {
                             headers: {
                                 "accept-Language": localStorage.getItem("preferredLanguage"),
                                 "Content-Type": "application/json",
-                                "Authorization": `Bearer ${localStorage.getItem("token")}`
-                            }
+                               
+                            },
+                            withCredentials: true
                         }
                     );
                     
@@ -70,9 +71,10 @@ const Weather = ({ userId }) => {
             
                 headers: {
                     "accept-Language": localStorage.getItem("preferredLanguage"),
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    
                     "Content-Type": "application/json"
-                }
+                },
+                withCredentials: true
             });
 
             console.log(response);
