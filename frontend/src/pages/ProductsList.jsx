@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { Loader2, Tag, Sprout, Award, Tractor, Clock } from "lucide-react";
 import { Button } from "../components/ui/button";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const getCategoryIcon = (category) => {
   switch (category) {
     case "crop":
@@ -43,7 +43,7 @@ const ProductsList = () => {
     const fetchProducts = async () => {
       try {
         setProductsData(prev => ({ ...prev, loading: true, error: null }));
-        const response = await axios.get("http://localhost:5000/api/products/getProducts");
+        const response = await axios.get(`${backendUrl}/api/products/getProducts`);
         
         // Ensure we always have an array
         const receivedProducts = Array.isArray(response.data?.products) 

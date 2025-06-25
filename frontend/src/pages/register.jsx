@@ -4,7 +4,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,7 +63,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+          `${backendUrl}/api/auth/register`,
         formData,
         { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );
@@ -78,7 +78,7 @@ const Register = () => {
 
   const handleGoogleAuth = () => {
     Cookies.set("authState", "register", { expires: 1, sameSite: "Strict" });
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = `${backendUrl}/api/auth/google`;
   };
 
   return (

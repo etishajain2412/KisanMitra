@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Loader2, Leaf, Tractor, ShoppingBasket, TreePine, Calendar, Clock, CheckCircle } from "lucide-react";
 import { cn } from "../lib/utils";
 import NavigationBar from "../components/NavigationBar";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const AddProduct = () => {
   const [activeView, setActiveView] = useState("addProduct");
   const [formData, setFormData] = useState({
@@ -159,7 +159,7 @@ const AddProduct = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:5000/api/products/addProduct",
+        `${backendUrl}/api/products/addProduct`,
         productData,
         {
           headers: {

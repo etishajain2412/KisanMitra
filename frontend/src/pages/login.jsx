@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const Login = () => {
   const [formData, setFormData] = useState({
     identifier: '',
@@ -36,7 +36,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', formData, {
+      const res = await axios.post(`${backendUrl}/api/auth/login`, formData, {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true,
       });
@@ -49,7 +49,7 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     Cookies.set("authState", "login", { expires: 1, sameSite: "Strict" });
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = `${backendUrl}/api/auth/google`
   };
 
   return (

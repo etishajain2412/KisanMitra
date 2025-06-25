@@ -20,7 +20,7 @@ import {
   PaginationPrevious 
 } from "../components/ui/pagination";
 import { Package, IndianRupee, Clock, PackageOpen, Truck } from "lucide-react";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 axios.defaults.withCredentials = true;
 
 const OrdersPage = () => {
@@ -31,7 +31,7 @@ const OrdersPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/orders/");
+        const response = await axios.get(`${backendUrl}/api/orders/`);
         setOrders(response.data);
       } catch (err) {
         setError("Failed to fetch orders");

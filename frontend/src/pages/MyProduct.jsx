@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 axios.defaults.withCredentials=true
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const MyProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +15,7 @@ const MyProducts = () => {
   useEffect(() => {
     const fetchMyProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/products/myProducts", {
+        const response = await axios.get(`${backendUrl}/api/products/myProducts`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
@@ -32,7 +33,7 @@ const MyProducts = () => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/delete/${productId}`, {
+      await axios.delete(`${backendUrl}/api/products/delete/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter((product) => product._id !== productId));
@@ -44,7 +45,7 @@ const MyProducts = () => {
   const toggleBidding = async (productId, isBiddingEnabled, minimumBidAmount) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/products/toggleBidding/${productId}`,
+        `${backendUrl}/api/products/toggleBidding/${productId}`,
         { isBiddingEnabled, minimumBidAmount },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -81,7 +82,7 @@ const MyProducts = () => {
       }
 
       const response = await axios.put(
-        `http://localhost:5000/api/products/update/${productId}`,
+        `${backendUrl}/api/products/update/${productId}`,
         formData,
         {
           headers: {

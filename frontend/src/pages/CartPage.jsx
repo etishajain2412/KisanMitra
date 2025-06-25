@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 import {
   ShoppingCart,
   Trash2,
@@ -31,7 +32,7 @@ const CartPage = () => {
     const fetchCart = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/cart', {
+        const response = await axios.get(`${backendUrl}/api/cart`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCart(response.data || { items: [], total: 0 });
@@ -52,7 +53,7 @@ const CartPage = () => {
     try {
       setUpdating(itemId);
       
-      const currentCart = await axios.get('http://localhost:5000/api/cart', {
+      const currentCart = await axios.get(`${backendUrl}/api/cart`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -66,7 +67,7 @@ const CartPage = () => {
       }
 
       const response = await axios.put(
-        `http://localhost:5000/api/cart/update/${itemId}`,
+        `${backendUrl}/api/cart/update/${itemId}`,
         { quantity: newQuantity },
         { 
           headers: { Authorization: `Bearer ${token}` },
@@ -88,7 +89,7 @@ const CartPage = () => {
     try {
       setRemoving(itemId);
       const response = await axios.delete(
-        `http://localhost:5000/api/cart/remove/${itemId}`,
+        `${backendUrl}/api/cart/remove/${itemId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCart(response.data);
@@ -103,7 +104,7 @@ const CartPage = () => {
     try {
       setLoading(true);
       const response = await axios.delete(
-        'http://localhost:5000/api/cart/clear',
+        `${backendUrl}/api/cart/clear`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCart(response.data);

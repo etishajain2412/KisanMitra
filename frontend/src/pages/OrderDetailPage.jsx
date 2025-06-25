@@ -20,7 +20,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Separator } from "../components/ui/separator";
 import { IndianRupee, Truck, Package, CheckCircle, MapPin, ArrowLeft } from "lucide-react";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 axios.defaults.withCredentials = true;
 
 const OrderDetailPage = () => {
@@ -32,7 +32,7 @@ const OrderDetailPage = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/orders/${id}`);
+        const response = await axios.get(`${backendUrl}/api/orders/${id}`);
         const data = response.data;
         
         if (!data) {

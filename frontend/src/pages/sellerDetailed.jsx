@@ -7,7 +7,7 @@ import Input from "../components/ui/Input";
 import Label from "../components/ui/Label";
 import { Separator } from "../components/ui/separator";
 import { IndianRupee, Package, Truck, CheckCircle, Clock } from "lucide-react";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const OrderDetailsPage = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
@@ -18,7 +18,7 @@ const OrderDetailsPage = () => {
     const fetchOrderDetails = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/orders/seller/orders/${orderId}`);
+        const response = await axios.get(`${backendUrl}/api/orders/seller/orders/${orderId}`);
         setOrder(response.data.order); // Set the order data from the response
         setLoading(false);
       } catch (err) {
@@ -74,7 +74,7 @@ const OrderDetailsPage = () => {
     const handleStatusUpdate = (newStatus) => async () => {
       try {
         setLoading(true);
-        await axios.put(`http://localhost:5000/api/orders/seller/orders/${orderId}`, {
+        await axios.put(`${backendUrl}/api/orders/seller/orders/${orderId}`, {
           orderStatus: newStatus,
         });
         setOrder({ ...order, orderStatus: newStatus });

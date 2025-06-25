@@ -4,7 +4,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { Loader2, ArrowLeft, MapPin } from 'lucide-react';
 import { Button } from '../components/ui/button';
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 axios.defaults.withCredentials = true;
 
 const CheckoutPage = () => {
@@ -29,7 +29,7 @@ const CheckoutPage = () => {
       try {
         setLoading(true);
         if (!location.state?.cart) {
-          const cartResponse = await axios.get('http://localhost:5000/api/cart', {
+          const cartResponse = await axios.get(`${backendUrl}/api/cart`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setCart(cartResponse.data);

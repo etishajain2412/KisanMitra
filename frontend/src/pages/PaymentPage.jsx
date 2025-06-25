@@ -14,7 +14,7 @@ const PaymentPage = () => {
 
   const [loading, setLoading] = useState(false);
   const key_id = import.meta.env.VITE_RAZORPAY_KEY_ID;
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
   useEffect(() => {
     if (!cartItems.length) {
       navigate("/");
@@ -25,7 +25,7 @@ const PaymentPage = () => {
     try {
       setLoading(true);
 
-      const orderResponse = await axios.post("http://localhost:5000/api/payment/create-order", {
+      const orderResponse = await axios.post(`${backendUrl}/api/payment/create-order`, {
         amount: total,
         product: cartItems,
         address,

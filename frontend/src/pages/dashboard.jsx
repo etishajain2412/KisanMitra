@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 function Dashboard() {
   const navigate = useNavigate();
   const [image, setImage] = useState(null);
@@ -19,7 +19,7 @@ function Dashboard() {
   // Fetch user profile details (Uses cookies)
   const fetchUserProfile = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/users/me', {
+      const res = await axios.get(`${backendUrl}/api/users/me`, {
         withCredentials: true, // Sends the auth token from cookies
       });
       setProfilePic(res.data.profileImage);
@@ -48,7 +48,7 @@ function Dashboard() {
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/users/upload-profile',
+        `${backendUrl}/api/users/upload-profile`,
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },
@@ -70,7 +70,7 @@ function Dashboard() {
   // Remove Profile Picture
   const handleRemovePicture = async () => {
     try {
-      await axios.delete('http://localhost:5000/api/users/remove-profile', {
+      await axios.delete(`${backendUrl}/api/users/remove-profile`, {
         withCredentials: true,
       });
 
@@ -85,7 +85,7 @@ function Dashboard() {
   // Logout handler (Clears Cookie)
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+      await axios.post(`${backendUrl}/api/auth/logout`, {}, { withCredentials: true });
       Cookies.remove('token'); // Remove token from cookies
       navigate('/login');
     } catch (error) {

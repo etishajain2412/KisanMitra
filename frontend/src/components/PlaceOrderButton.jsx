@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import Cookies from "js-cookie";
 
 axios.defaults.withCredentials = true;
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const PlaceOrderButton = ({ cartItems, totalAmount }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ const PlaceOrderButton = ({ cartItems, totalAmount }) => {
 
       // 1. Save the order details to your backend with status 'confirmed' (no payment)
       const orderResponse = await axios.post(
-        "http://localhost:5000/api/orders/create",
+        `${backendUrl}/api/orders/create`,
         {
           items: validCartItems,
           totalAmount,

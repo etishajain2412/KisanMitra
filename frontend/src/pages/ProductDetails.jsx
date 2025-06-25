@@ -16,7 +16,7 @@ import ProductImageGallery from '../components/product/ProductImageGallery'
 import BuyNowSection from '../components/product/BuyNowSection'
 import BiddingSection from '../components/product/BiddingSection'
 import ProductReviews from '../components/product/ProductReviews'
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const ProductDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -36,7 +36,7 @@ const ProductDetails = () => {
       try {
         setLoading(true)
         const response = await axios.get(
-          `http://localhost:5000/api/products/getProduct/${id}`,
+          `${backendUrl}/api/products/getProduct/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -48,7 +48,7 @@ const ProductDetails = () => {
 
         if (token) {
           const orderCheck = await axios.get(
-            `http://localhost:5000/api/orders/hasOrdered/${id}`,
+            `${backendUrl}/api/orders/hasOrdered/${id}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`
@@ -110,7 +110,7 @@ const ProductDetails = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/products/placeBid/${id}/`,
+        `${backendUrl}/api/products/placeBid/${id}/`,
         { bidAmount: bidValue, quantity },
         {
           headers: {
@@ -148,7 +148,7 @@ const ProductDetails = () => {
 
     try {
       await axios.post(
-        `http://localhost:5000/api/orders`,
+        `${backendUrl}/api/orders`,
         {
           productId: id,
           quantity
@@ -162,7 +162,7 @@ const ProductDetails = () => {
       )
 
       const response = await axios.get(
-        `http://localhost:5000/api/products/getProduct/${id}`,
+        `${backendUrl}/api/products/getProduct/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -195,7 +195,7 @@ const ProductDetails = () => {
 
     try {
       await axios.post(
-        `http://localhost:5000/api/cart`,
+        `${backendUrl}/api/cart`,
         {
           productId: id,
           quantity
@@ -232,7 +232,7 @@ const ProductDetails = () => {
 
     try {
       await axios.post(
-        `http://localhost:5000/api/products/${id}/reviews`,
+        `${backendUrl}/api/products/${id}/reviews`,
         {
           rating,
           comment: reviewText.trim()
@@ -248,7 +248,7 @@ const ProductDetails = () => {
       setError('Review submitted successfully!')
 
       const response = await axios.get(
-        `http://localhost:5000/api/products/${id}`,
+        `${backendUrl}/api/products/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`

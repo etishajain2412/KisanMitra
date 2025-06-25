@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Sprout, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const socket = io("http://localhost:5000");
 
 function News() {
@@ -15,7 +15,7 @@ function News() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/news", { withCredentials: true })
+      .get(`${backendUrl}/api/news`, { withCredentials: true })
       .then((res) => {
         setNews(res.data.articles || []);
         setLoading(false);

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Separator } from "../components/ui/separator";
 import { CreditCard, IndianRupee, LoaderCircle } from "lucide-react";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const PaymentComponent = ({ amount, cartItems }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ const PaymentComponent = ({ amount, cartItems }) => {
       }));
 
       const orderResponse = await axios.post(
-        "http://localhost:5000/api/payment/create-order",
+        `${backendUrl}/api/payment/create-order`,
         {
           amount,
           product: enrichedCartItems,
@@ -56,7 +56,7 @@ const PaymentComponent = ({ amount, cartItems }) => {
           } = response;
 
           const paymentResponse = await axios.post(
-            "http://localhost:5000/api/payment/verify-payment",
+            `${backendUrl}/api/payment/verify-payment`,
             {
               paymentId: razorpay_payment_id,
               orderId: razorpay_order_id,

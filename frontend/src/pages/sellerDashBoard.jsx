@@ -37,7 +37,7 @@ import Input from "../components/ui/Input";
 import axios from 'axios';
 import StatusBadge from "../components/ui/StatusBadge";
 import { cn } from "../lib/utils";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 axios.defaults.withCredentials = true;
 
 const SellerDashboard = () => {
@@ -52,10 +52,10 @@ const SellerDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const ordersResponse = await axios.get('http://localhost:5000/api/orders/seller/orders');
+        const ordersResponse = await axios.get(`${backendUrl}/api/orders/seller/orders`);
         setOrders(ordersResponse.data);
 
-        const statsResponse = await axios.get('http://localhost:5000/api/orders/seller/dashboard-stats');
+        const statsResponse = await axios.get(`${backendUrl}/api/orders/seller/dashboard-stats`);
         setStats(statsResponse.data);
 
         setLoading(false);
