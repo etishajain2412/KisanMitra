@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ShoppingCart, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
-import Input from "../ui/Input";
+import Input from "../ui/input";
 
 const BuyNowSection = ({ 
   product, 
