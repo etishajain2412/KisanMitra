@@ -1,5 +1,5 @@
 const SuccessStory  = require("../models/SuccessStory");
-const User  = require("../models/User");
+const User  = require("../models/user");
 module.exports = (io, socket) => {
     console.log("📡 Success Stories Socket Connected:", socket.id);
 
